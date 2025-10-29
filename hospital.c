@@ -118,16 +118,12 @@ int main() {
                 break;
             case 11:
                 saveData();
-                printf("Data saved successfully!\n");
-                break;
-            case 12:
-                saveData();
                 printf("Thank you for using Hospital Management System!\n");
                 break;
             default:
                 printf("Invalid choice! Please try again.\n");
         }
-    } while(choice != 12);
+    } while(choice != 11);
 
     return 0;
 }
@@ -144,8 +140,7 @@ void displayMenu() {
     printf("8. View Appointments\n");
     printf("9. Generate Bill\n");
     printf("10. View Bills\n");
-    printf("11. Save Data\n");
-    printf("12. Exit\n");
+    printf("11. Exit\n");
 }
 
 void addPatient() {
@@ -182,6 +177,8 @@ void addPatient() {
     p.medical_history[strcspn(p.medical_history, "\n")] = 0;
 
     patients[patient_count++] = p;
+
+    saveData();
     printf("Patient added successfully! Patient ID: %d\n", p.id);
 }
 
@@ -192,7 +189,7 @@ void viewPatients() {
     }
 
     printf("\n=== ALL PATIENTS ===\n");
-    printf("ID\tName\t\tAge\tGender\tContact\n");
+    printf("ID\tName\tAge\tGender\tContact\n");
     printf("------------------------------------------------\n");
 
     for(int i = 0; i < patient_count; i++) {
@@ -293,6 +290,8 @@ void addDoctor() {
     d.availability[strcspn(d.availability, "\n")] = 0;
 
     doctors[doctor_count++] = d;
+
+    saveData();
     printf("Doctor added successfully! Doctor ID: %d\n", d.id);
 }
 
@@ -440,6 +439,8 @@ void scheduleAppointment() {
     strcpy(a.status, "Scheduled");
 
     appointments[appointment_count++] = a;
+
+    saveData();
     printf("Appointment scheduled successfully! Appointment ID: %d\n", a.id);
 }
 
@@ -503,6 +504,8 @@ void generateBill() {
     strcpy(b.status, "Generated");
 
     bills[bill_count++] = b;
+
+    saveData();
 
     printf("\n=== BILL GENERATED ===\n");
     printf("Bill No: %d\n", b.bill_no);
