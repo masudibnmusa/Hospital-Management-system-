@@ -507,9 +507,64 @@ void generateBill() {
 
     saveData();
 
+    // Get patient name
+    char patient_name[50] = "Unknown";
+    for(int i = 0; i < patient_count; i++) {
+        if(patients[i].id == b.patient_id) {
+            strcpy(patient_name, patients[i].name);
+            break;
+        }
+    }
+
+    char filename[100];
+    sprintf(filename, "Bill_%d.txt", b.bill_no);
+
+    FILE *fp = fopen(filename, "w");
+    if(fp != NULL) {
+        // Header
+        fprintf(fp, "===============================================\n");
+        fprintf(fp, "          HOSPITAL MANAGEMENT SYSTEM          \n");
+        fprintf(fp, "             PATIENT INVOICE/BILL             \n");
+        fprintf(fp, "===============================================\n\n");
+
+        // Bill details
+        fprintf(fp, "Bill Number    : %d\n", b.bill_no);
+        fprintf(fp, "Date           : %s\n", b.date);
+        fprintf(fp, "Patient ID     : %d\n", b.patient_id);
+        fprintf(fp, "Patient Name   : %s\n", patient_name);
+        fprintf(fp, "Status         : %s\n\n", b.status);
+
+        fprintf(fp, "-----------------------------------------------\n");
+        fprintf(fp, "                CHARGES BREAKDOWN              \n");
+        fprintf(fp, "-----------------------------------------------\n\n");
+
+        // Charges breakdown
+        fprintf(fp, "Consultation Fee      : $%.2f\n", b.consultation_fee);
+        fprintf(fp, "Medicine Charges      : $%.2f\n", b.medicine_charges);
+        fprintf(fp, "Room Charges          : $%.2f\n", b.room_charges);
+        fprintf(fp, "Lab/Test Charges      : $%.2f\n", b.lab_charges);
+
+        fprintf(fp, "\n-----------------------------------------------\n");
+        fprintf(fp, "TOTAL AMOUNT          : $%.2f\n", b.total_amount);
+        fprintf(fp, "-----------------------------------------------\n\n");
+
+        // Footer
+        fprintf(fp, "Payment Status: %s\n\n", b.status);
+        fprintf(fp, "Thank you for choosing our hospital!\n");
+        fprintf(fp, "For queries, contact: +123-456-7890\n");
+        fprintf(fp, "===============================================\n");
+
+        fclose(fp);
+        printf("\n Bill saved as: %s\n", filename);
+    } else {
+        printf("\n  Warning: Could not create text file for bill!\n");
+    }
+
+    // Display on screen
     printf("\n=== BILL GENERATED ===\n");
     printf("Bill No: %d\n", b.bill_no);
     printf("Patient ID: %d\n", b.patient_id);
+    printf("Patient Name: %s\n", patient_name);
     printf("Consultation Fee: $%.2f\n", b.consultation_fee);
     printf("Medicine Charges: $%.2f\n", b.medicine_charges);
     printf("Room Charges: $%.2f\n", b.room_charges);
