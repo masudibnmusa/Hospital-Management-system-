@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <termios.h>
+#include <unistd.h>
+#endif
 
 // Cross-platform screen clear function
 #ifdef _WIN32
@@ -799,7 +805,52 @@ void loadData() {
 
 //  ADMIN PANEL FUNCTIONS
 
+void getPasswordWithMask(char *password, int max_length) {
+    int i = 0;
+    char ch;
+
+    printf("Password: ");
+
+    while (1) {
+        #ifdef _WIN32
+            ch = _getch();  // Windows specific
+        #else
+            // Linux/Mac - disable echo
+            struct termios oldt, newt;
+            tcgetattr(STDIN_FILENO, &oldt);
+            newt = oldt;
+            newt.c_lflag &= ~(ECHO);
+            tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+            ch = getchar();
+
+            // Restore terminal settings immediately
+            tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        #endif
+
+        // Check for Enter key (carriage return or newline)
+        if (ch == '\r' || ch == '\n') {
+            break;
+        }
+        // Check for Backspace
+        else if (ch == 127 || ch == 8) { // 127=Linux/Mac, 8=Windows
+            if (i > 0) {
+                i--;
+                printf("\b \b"); // Move back, space, move back again
+            }
+        }
+        // Regular character input
+        else if (i < max_length - 1) {
+            password[i++] = ch;
+            printf("*");
+        }
+    }
+
+    password[i] = '\0'; // Null terminate the string
+    printf("\n");
+}
 // Admin Login Function
+
 int adminLogin() {
     char username[50];
     char password[50];
@@ -812,13 +863,13 @@ int adminLogin() {
     while(attempts < 3) {
         printf("\nUsername: ");
         scanf("%s", username);
-        printf("Password: ");
-        scanf("%s", password);
 
-        // Default credentials (you can change these)
+        // Use the password masking function
+        getPasswordWithMask(password, 50);
+
         if(strcmp(username, "admin") == 0 && strcmp(password, "admin123") == 0) {
             printf("\nLogin Successful! Welcome Admin!\n");
-            return 1;  // Success
+            return 1;
         } else {
             attempts++;
             printf("Invalid credentials! Attempts remaining: %d\n", 3 - attempts);
@@ -826,7 +877,7 @@ int adminLogin() {
     }
 
     printf("\nAccess Denied! Too many failed attempts.\n");
-    return 0;  // Failed
+    return 0;
 }
 
 // Admin Menu
@@ -1009,4 +1060,6 @@ void addDoctor() {
     printf("Availability   : %s\n", d.availability);
     printf("========================================\n");
     printf("Total doctors: %d\n", doctor_count);
+
 }
+
