@@ -56,6 +56,20 @@ typedef struct {
     char date[20];
     char status[20];
 } Bill;
+typedef struct {
+    int id;
+    char name[50];
+    char role[30];           // Nurse, Receptionist, Technician, etc.
+    char department[50];
+    char contact[15];
+    char email[50];
+    char address[100];
+    char qualification[100];
+    float salary;
+    char join_date[20];
+    char shift[20];          // Morning, Evening, Night
+    char status[20];         // Active, Inactive
+} Staff;
 
 // Global arrays to store data
 Patient patients[1000];
@@ -67,6 +81,9 @@ int patient_count = 0;
 int doctor_count = 0;
 int appointment_count = 0;
 int bill_count = 0;
+
+Staff staff[200];
+int staff_count = 0;
 
 // Function prototypes
 void clearScreen();
@@ -82,6 +99,7 @@ void scheduleAppointment();
 void viewAppointments();
 void generateBill();
 void viewBills();
+void staffManagementMenu();
 void saveData();
 void loadData();
 int getNewPatientId();
@@ -91,6 +109,15 @@ int getNewBillNo();
 int adminLogin();
 void adminMenu();
 void removeDoctor();
+void addStaff();
+void viewStaff();
+void editStaff();
+void deleteStaff();
+void assignDutyRoster();
+void searchStaff();
+int getNewStaffId();
+void saveStaffData();
+void loadStaffData();
 
 // Utility function to clear screen
 void clearScreen() {
@@ -729,8 +756,40 @@ int getNewBillNo() {
     }
     return max_bill + 1;
 }
+int getNewStaffId() {
+    int max_id = 2000;
+    for(int i = 0; i < staff_count; i++) {
+        if(staff[i].id > max_id) {
+            max_id = staff[i].id;
+        }
+    }
+    return max_id + 1;
+}
 
 // File handling functions
+
+// Save staff data to file
+void saveStaffData() {
+    FILE *fp = fopen("staff.dat", "wb");
+    if(fp != NULL) {
+        fwrite(&staff_count, sizeof(int), 1, fp);
+        fwrite(staff, sizeof(Staff), staff_count, fp);
+        fclose(fp);
+    }
+}
+
+// Load staff data from file
+void loadStaffData() {
+    FILE *fp = fopen("staff.dat", "rb");
+    if(fp != NULL) {
+        fread(&staff_count, sizeof(int), 1, fp);
+        fread(staff, sizeof(Staff), staff_count, fp);
+        fclose(fp);
+    }
+}
+
+// Save all data to files
+
 void saveData() {
     FILE *fp;
 
@@ -765,6 +824,9 @@ void saveData() {
         fwrite(bills, sizeof(Bill), bill_count, fp);
         fclose(fp);
     }
+    // Save staff data
+    saveStaffData();
+
 }
 
 void loadData() {
@@ -801,7 +863,10 @@ void loadData() {
         fread(bills, sizeof(Bill), bill_count, fp);
         fclose(fp);
     }
+    // Load staff data
+     loadStaffData();
 }
+
 
 //  ADMIN PANEL FUNCTIONS
 
@@ -893,7 +958,8 @@ void adminMenu() {
         printf("  2. Remove Doctor                     \n");
         printf("  3. View All Doctors                  \n");
         printf("  4. Search Doctor                     \n");
-        printf("  5. Logout                            \n");
+        printf("  5. Staff Management                  \n");
+        printf("  6. Logout                            \n");
         printf("========================================\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
@@ -918,6 +984,10 @@ void adminMenu() {
                 pauseScreen();
                 break;
             case 5:
+                staffManagementMenu();
+                pauseScreen();
+                break;
+            case 6:
                 printf("========================================\n");
                 printf("    Logged out successfully!           \n");
                 printf("========================================\n");
@@ -926,7 +996,47 @@ void adminMenu() {
                 printf("Invalid choice! Please try again.\n");
                 pauseScreen();
         }
-    } while(choice != 5);
+    } while(choice != 6);
+}
+
+void staffManagementMenu() {
+    int choice;
+    do {
+        clearScreen();
+        printf("========================================\n");
+        printf("           STAFF MANAGEMENT            \n");
+        printf("========================================\n");
+        printf("  1. Add New Staff                     \n");
+        printf("  2. View All Staff                    \n");
+        printf("  3. Edit Staff Information            \n");
+        printf("  4. Delete Staff                      \n");
+        printf("  5. Assign Duty Roster                \n");
+        printf("  6. Search Staff                      \n");
+        printf("  7. Back to Admin Menu                \n");
+        printf("========================================\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        clearScreen();
+
+        switch(choice) {
+            case 1: addStaff();
+            break;
+            case 2: viewStaff();
+            break;
+            case 3: editStaff();
+            break;
+            case 4: deleteStaff();
+            break;
+            case 5: assignDutyRoster();
+            break;
+            case 6: searchStaff();
+            break;
+            case 7: printf("Returning to Admin Menu...\n"); break;
+            default: printf("Invalid choice!\n");
+        }
+        if(choice != 7) pauseScreen();
+    } while(choice != 7);
 }
 
 // Remove Doctor Function
@@ -1063,3 +1173,423 @@ void addDoctor() {
 
 }
 
+// Add new staff member
+void addStaff() {
+    printf("========================================\n");
+    printf("           ADD NEW STAFF               \n");
+    printf("========================================\n\n");
+
+    if(staff_count >= 200) {
+        printf("Staff database full! Cannot add more staff.\n");
+        return;
+    }
+
+    Staff s;
+    s.id = getNewStaffId();
+
+    printf("Enter staff name: ");
+    getchar();
+    fgets(s.name, 50, stdin);
+    s.name[strcspn(s.name, "\n")] = 0;
+
+    printf("Enter role (Nurse/Receptionist/Technician/etc.): ");
+    fgets(s.role, 30, stdin);
+    s.role[strcspn(s.role, "\n")] = 0;
+
+    printf("Enter department: ");
+    fgets(s.department, 50, stdin);
+    s.department[strcspn(s.department, "\n")] = 0;
+
+    printf("Enter contact number: ");
+    fgets(s.contact, 15, stdin);
+    s.contact[strcspn(s.contact, "\n")] = 0;
+
+    printf("Enter email: ");
+    fgets(s.email, 50, stdin);
+    s.email[strcspn(s.email, "\n")] = 0;
+
+    printf("Enter address: ");
+    fgets(s.address, 100, stdin);
+    s.address[strcspn(s.address, "\n")] = 0;
+
+    printf("Enter qualification: ");
+    fgets(s.qualification, 100, stdin);
+    s.qualification[strcspn(s.qualification, "\n")] = 0;
+
+    printf("Enter salary: ");
+    scanf("%f", &s.salary);
+
+    printf("Enter join date (DD/MM/YYYY): ");
+    getchar();
+    fgets(s.join_date, 20, stdin);
+    s.join_date[strcspn(s.join_date, "\n")] = 0;
+
+    printf("Enter default shift (Morning/Evening/Night): ");
+    fgets(s.shift, 20, stdin);
+    s.shift[strcspn(s.shift, "\n")] = 0;
+
+    strcpy(s.status, "Active");
+
+    staff[staff_count++] = s;
+    saveStaffData();
+
+    printf("\n========================================\n");
+    printf("     STAFF ADDED SUCCESSFULLY!        \n");
+    printf("========================================\n");
+    printf("Staff ID     : %d\n", s.id);
+    printf("Name         : %s\n", s.name);
+    printf("Role         : %s\n", s.role);
+    printf("Department   : %s\n", s.department);
+    printf("Contact      : %s\n", s.contact);
+    printf("========================================\n");
+}
+
+// View all staff members
+void viewStaff() {
+    printf("========================================\n");
+    printf("            ALL STAFF MEMBERS          \n");
+    printf("========================================\n\n");
+
+    if(staff_count == 0) {
+        printf("No staff members found!\n");
+        return;
+    }
+
+    printf("ID\tName\t\t\tRole\t\tDepartment\t\tContact\n");
+    printf("--------------------------------------------------------------------------------\n");
+
+    for(int i = 0; i < staff_count; i++) {
+        printf("%d\t%-20s\t%-15s\t%-20s\t%s\n",
+               staff[i].id, staff[i].name, staff[i].role,
+               staff[i].department, staff[i].contact);
+    }
+
+    printf("\nTotal staff members: %d\n", staff_count);
+}
+
+// Edit staff information
+void editStaff() {
+    printf("========================================\n");
+    printf("           EDIT STAFF INFORMATION      \n");
+    printf("========================================\n\n");
+
+    if(staff_count == 0) {
+        printf("No staff members available!\n");
+        return;
+    }
+
+    int staff_id;
+    int found = 0;
+
+    printf("Available Staff:\n");
+    printf("--------------------------------------------------------------------------------\n");
+    viewStaff();
+
+    printf("\nEnter Staff ID to edit: ");
+    scanf("%d", &staff_id);
+
+    for(int i = 0; i < staff_count; i++) {
+        if(staff[i].id == staff_id) {
+            found = 1;
+
+            printf("\n========================================\n");
+            printf("     EDITING STAFF ID: %d            \n", staff_id);
+            printf("========================================\n");
+
+            printf("Current Name (%s): ", staff[i].name);
+            getchar();
+            char temp[50];
+            fgets(temp, 50, stdin);
+            if(strlen(temp) > 1) {
+                temp[strcspn(temp, "\n")] = 0;
+                strcpy(staff[i].name, temp);
+            }
+
+            printf("Current Role (%s): ", staff[i].role);
+            fgets(temp, 30, stdin);
+            if(strlen(temp) > 1) {
+                temp[strcspn(temp, "\n")] = 0;
+                strcpy(staff[i].role, temp);
+            }
+
+            printf("Current Department (%s): ", staff[i].department);
+            fgets(temp, 50, stdin);
+            if(strlen(temp) > 1) {
+                temp[strcspn(temp, "\n")] = 0;
+                strcpy(staff[i].department, temp);
+            }
+
+            printf("Current Contact (%s): ", staff[i].contact);
+            fgets(temp, 15, stdin);
+            if(strlen(temp) > 1) {
+                temp[strcspn(temp, "\n")] = 0;
+                strcpy(staff[i].contact, temp);
+            }
+
+            printf("Current Email (%s): ", staff[i].email);
+            fgets(temp, 50, stdin);
+            if(strlen(temp) > 1) {
+                temp[strcspn(temp, "\n")] = 0;
+                strcpy(staff[i].email, temp);
+            }
+
+            printf("Current Salary (%.2f): ", staff[i].salary);
+            char salary_input[20];
+            fgets(salary_input, 20, stdin);
+            if(strlen(salary_input) > 1) {
+                staff[i].salary = atof(salary_input);
+            }
+
+            printf("Current Shift (%s): ", staff[i].shift);
+            fgets(temp, 20, stdin);
+            if(strlen(temp) > 1) {
+                temp[strcspn(temp, "\n")] = 0;
+                strcpy(staff[i].shift, temp);
+            }
+
+            saveStaffData();
+
+            printf("\n========================================\n");
+            printf("   STAFF INFORMATION UPDATED!         \n");
+            printf("========================================\n");
+            break;
+        }
+    }
+
+    if(!found) {
+        printf("\nStaff with ID %d not found!\n", staff_id);
+    }
+}
+
+// Delete staff member
+void deleteStaff() {
+    printf("========================================\n");
+    printf("            DELETE STAFF               \n");
+    printf("========================================\n\n");
+
+    if(staff_count == 0) {
+        printf("No staff members available to delete!\n");
+        return;
+    }
+
+    int staff_id;
+    int found = 0;
+    char confirm;
+
+    printf("Available Staff:\n");
+    printf("--------------------------------------------------------------------------------\n");
+    viewStaff();
+
+    printf("\nEnter Staff ID to delete: ");
+    scanf("%d", &staff_id);
+
+    for(int i = 0; i < staff_count; i++) {
+        if(staff[i].id == staff_id) {
+            found = 1;
+
+            printf("\n========================================\n");
+            printf("           STAFF DETAILS               \n");
+            printf("========================================\n");
+            printf("ID           : %d\n", staff[i].id);
+            printf("Name         : %s\n", staff[i].name);
+            printf("Role         : %s\n", staff[i].role);
+            printf("Department   : %s\n", staff[i].department);
+            printf("Contact      : %s\n", staff[i].contact);
+            printf("========================================\n");
+
+            printf("\nAre you sure you want to delete this staff member? (y/n): ");
+            scanf(" %c", &confirm);
+
+            if(confirm == 'y' || confirm == 'Y') {
+                // Shift all staff after this position
+                for(int j = i; j < staff_count - 1; j++) {
+                    staff[j] = staff[j + 1];
+                }
+                staff_count--;
+
+                saveStaffData();
+
+                printf("\n========================================\n");
+                printf("     STAFF DELETED SUCCESSFULLY!       \n");
+                printf("========================================\n");
+                printf("Total staff members now: %d\n", staff_count);
+            } else {
+                printf("\nOperation cancelled.\n");
+            }
+            break;
+        }
+    }
+
+    if(!found) {
+        printf("\nStaff with ID %d not found!\n", staff_id);
+    }
+}
+
+// Assign duty roster
+void assignDutyRoster() {
+    printf("========================================\n");
+    printf("           ASSIGN DUTY ROSTER          \n");
+    printf("========================================\n\n");
+
+    if(staff_count == 0) {
+        printf("No staff members available!\n");
+        return;
+    }
+
+    int staff_id;
+    int found = 0;
+
+    printf("Available Staff:\n");
+    printf("--------------------------------------------------------------------------------\n");
+    viewStaff();
+
+    printf("\nEnter Staff ID to assign duty: ");
+    scanf("%d", &staff_id);
+
+    for(int i = 0; i < staff_count; i++) {
+        if(staff[i].id == staff_id) {
+            found = 1;
+
+            printf("\n========================================\n");
+            printf("   ASSIGNING DUTY FOR: %s            \n", staff[i].name);
+            printf("========================================\n");
+            printf("Current Shift: %s\n", staff[i].shift);
+
+            printf("\nAvailable Shifts:\n");
+            printf("1. Morning (7:00 AM - 3:00 PM)\n");
+            printf("2. Evening (3:00 PM - 11:00 PM)\n");
+            printf("3. Night (11:00 PM - 7:00 AM)\n");
+            printf("4. Custom Shift\n");
+
+            int choice;
+            printf("\nEnter shift choice (1-4): ");
+            scanf("%d", &choice);
+
+            getchar(); // Clear buffer
+
+            switch(choice) {
+                case 1:
+                    strcpy(staff[i].shift, "Morning (7AM-3PM)");
+                    break;
+                case 2:
+                    strcpy(staff[i].shift, "Evening (3PM-11PM)");
+                    break;
+                case 3:
+                    strcpy(staff[i].shift, "Night (11PM-7AM)");
+                    break;
+                case 4:
+                    printf("Enter custom shift details: ");
+                    fgets(staff[i].shift, 20, stdin);
+                    staff[i].shift[strcspn(staff[i].shift, "\n")] = 0;
+                    break;
+                default:
+                    printf("Invalid choice! Keeping current shift.\n");
+            }
+
+            saveStaffData();
+
+            printf("\n========================================\n");
+            printf("     DUTY ROSTER UPDATED!             \n");
+            printf("========================================\n");
+            printf("Staff Name: %s\n", staff[i].name);
+            printf("New Shift : %s\n", staff[i].shift);
+            break;
+        }
+    }
+
+    if(!found) {
+        printf("\nStaff with ID %d not found!\n", staff_id);
+    }
+}
+
+// Search staff
+void searchStaff() {
+    printf("========================================\n");
+    printf("            SEARCH STAFF               \n");
+    printf("========================================\n\n");
+
+    if(staff_count == 0) {
+        printf("No staff members found!\n");
+        return;
+    }
+
+    int choice;
+    printf("1. Search by ID\n");
+    printf("2. Search by Name\n");
+    printf("3. Search by Role\n");
+    printf("4. Search by Department\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+
+    getchar(); // Clear buffer
+
+    if(choice == 1) {
+        int id;
+        printf("Enter staff ID: ");
+        scanf("%d", &id);
+
+        for(int i = 0; i < staff_count; i++) {
+            if(staff[i].id == id) {
+                printf("\n========================================\n");
+                printf("           STAFF FOUND                 \n");
+                printf("========================================\n");
+                printf("ID           : %d\n", staff[i].id);
+                printf("Name         : %s\n", staff[i].name);
+                printf("Role         : %s\n", staff[i].role);
+                printf("Department   : %s\n", staff[i].department);
+                printf("Contact      : %s\n", staff[i].contact);
+                printf("Email        : %s\n", staff[i].email);
+                printf("Address      : %s\n", staff[i].address);
+                printf("Qualification: %s\n", staff[i].qualification);
+                printf("Salary       : $%.2f\n", staff[i].salary);
+                printf("Join Date    : %s\n", staff[i].join_date);
+                printf("Shift        : %s\n", staff[i].shift);
+                printf("Status       : %s\n", staff[i].status);
+                printf("========================================\n");
+                return;
+            }
+        }
+        printf("\nStaff not found!\n");
+    }
+    else if(choice == 2 || choice == 3 || choice == 4) {
+        char search_term[50];
+
+        if(choice == 2) {
+            printf("Enter staff name: ");
+            fgets(search_term, 50, stdin);
+        }
+        else if(choice == 3) {
+            printf("Enter role: ");
+            fgets(search_term, 50, stdin);
+        }
+        else {
+            printf("Enter department: ");
+            fgets(search_term, 50, stdin);
+        }
+
+        search_term[strcspn(search_term, "\n")] = 0;
+
+        int found = 0;
+        printf("\nSearch Results:\n");
+        printf("ID\tName\t\t\tRole\t\tDepartment\t\tContact\n");
+        printf("--------------------------------------------------------------------------------\n");
+
+        for(int i = 0; i < staff_count; i++) {
+            if((choice == 2 && strstr(staff[i].name, search_term)) ||
+               (choice == 3 && strstr(staff[i].role, search_term)) ||
+               (choice == 4 && strstr(staff[i].department, search_term))) {
+                printf("%d\t%-20s\t%-15s\t%-20s\t%s\n",
+                       staff[i].id, staff[i].name, staff[i].role,
+                       staff[i].department, staff[i].contact);
+                found = 1;
+            }
+        }
+
+        if(!found) {
+            printf("No staff members found!\n");
+        }
+    }
+    else {
+        printf("Invalid choice!\n");
+    }
+}
