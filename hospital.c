@@ -58,9 +58,9 @@ int bill_count = 0;
 // Function prototypes
 void displayMenu();
 void addPatient();
+void addDoctor();
 void viewPatients();
 void searchPatient();
-void addDoctor();
 void viewDoctors();
 void searchDoctor();
 void scheduleAppointment();
@@ -73,12 +73,17 @@ int getNewPatientId();
 int getNewDoctorId();
 int getNewAppointmentId();
 int getNewBillNo();
+int adminLogin();
+void adminMenu();
+void removeDoctor();
 
 int main() {
     loadData();
     int choice;
 
-    printf("=== HOSPITAL MANAGEMENT SYSTEM ===\n");
+    printf("========================================\n");
+    printf("   HOSPITAL MANAGEMENT SYSTEM          \n");
+    printf("========================================\n");
 
     do {
         displayMenu();
@@ -96,25 +101,27 @@ int main() {
                 searchPatient();
                 break;
             case 4:
-                addDoctor();
-                break;
-            case 5:
                 viewDoctors();
                 break;
-            case 6:
+            case 5:
                 searchDoctor();
                 break;
-            case 7:
+            case 6:
                 scheduleAppointment();
                 break;
-            case 8:
+            case 7:
                 viewAppointments();
                 break;
-            case 9:
+            case 8:
                 generateBill();
                 break;
-            case 10:
+            case 9:
                 viewBills();
+                break;
+            case 10:
+                if(adminLogin()) {
+                    adminMenu();
+                }
                 break;
             case 11:
                 saveData();
@@ -133,13 +140,13 @@ void displayMenu() {
     printf("1. Add New Patient\n");
     printf("2. View All Patients\n");
     printf("3. Search Patient\n");
-    printf("4. Add New Doctor\n");
-    printf("5. View All Doctors\n");
-    printf("6. Search Doctor\n");
-    printf("7. Schedule Appointment\n");
-    printf("8. View Appointments\n");
-    printf("9. Generate Bill\n");
-    printf("10. View Bills\n");
+    printf("4. View All Doctors\n");
+    printf("5. Search Doctor\n");
+    printf("6. Schedule Appointment\n");
+    printf("7. View Appointments\n");
+    printf("8. Generate Bill\n");
+    printf("9. View Bills\n");
+    printf("10. Admin panel\n");
     printf("11. Exit\n");
 }
 
@@ -262,38 +269,6 @@ void searchPatient() {
     }
 }
 
-void addDoctor() {
-    if(doctor_count >= 100) {
-        printf("Doctor database full!\n");
-        return;
-    }
-
-    Doctor d;
-    d.id = getNewDoctorId();
-
-    printf("\n=== ADD NEW DOCTOR ===\n");
-    printf("Enter doctor name: ");
-    getchar();
-    fgets(d.name, 50, stdin);
-    d.name[strcspn(d.name, "\n")] = 0;
-
-    printf("Enter specialization: ");
-    fgets(d.specialization, 50, stdin);
-    d.specialization[strcspn(d.specialization, "\n")] = 0;
-
-    printf("Enter contact number: ");
-    fgets(d.contact, 15, stdin);
-    d.contact[strcspn(d.contact, "\n")] = 0;
-
-    printf("Enter availability: ");
-    fgets(d.availability, 50, stdin);
-    d.availability[strcspn(d.availability, "\n")] = 0;
-
-    doctors[doctor_count++] = d;
-
-    saveData();
-    printf("Doctor added successfully! Doctor ID: %d\n", d.id);
-}
 
 void viewDoctors() {
     if(doctor_count == 0) {
@@ -683,4 +658,202 @@ void loadData() {
         fread(bills, sizeof(Bill), bill_count, fp);
         fclose(fp);
     }
+}
+//  ADMIN PANEL FUNCTIONS
+
+// Admin Login Function
+int adminLogin() {
+    char username[50];
+    char password[50];
+    int attempts = 0;
+
+    printf("\n========================================\n");
+    printf("          ADMIN LOGIN PANEL            \n");
+    printf("========================================\n");
+
+    while(attempts < 3) {
+        printf("\nUsername: ");
+        scanf("%s", username);
+        printf("Password: ");
+        scanf("%s", password);
+
+        // Default credentials (you can change these)
+        if(strcmp(username, "admin") == 0 && strcmp(password, "admin123") == 0) {
+            printf("\n Login Successful! Welcome Admin!\n");
+            return 1;  // Success
+        } else {
+            attempts++;
+            printf(" Invalid credentials! Attempts remaining: %d\n", 3 - attempts);
+        }
+    }
+
+    printf("\n Access Denied! Too many failed attempts.\n");
+    return 0;  // Failed
+}
+
+// Admin Menu
+void adminMenu() {
+    int choice;
+
+    do {
+        printf("\n========================================\n");
+        printf("             ADMIN PANEL                \n");
+        printf("========================================\n");
+        printf("  1. Add New Doctor                    \n");
+        printf("  2. Remove Doctor                     \n");
+        printf("  3. View All Doctors                  \n");
+        printf("  4. Search Doctor                     \n");
+        printf("  5. Logout                            \n");
+        printf("========================================\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                addDoctor();
+                break;
+            case 2:
+                removeDoctor();
+                break;
+            case 3:
+                viewDoctors();
+                break;
+            case 4:
+                searchDoctor();
+                break;
+            case 5:
+                printf("\n Logged out successfully!\n");
+                break;
+            default:
+                printf(" Invalid choice! Please try again.\n");
+        }
+    } while(choice != 5);
+}
+
+// Remove Doctor Function
+void removeDoctor() {
+    if(doctor_count == 0) {
+        printf("\n No doctors available to remove!\n");
+        return;
+    }
+
+    int doctor_id;
+    int found = 0;
+    char confirm;
+
+    printf("\n========================================\n");
+    printf("            REMOVE DOCTOR               \n");
+    printf("========================================\n\n");
+
+    // Show all doctors
+    printf("Available Doctors:\n");
+    viewDoctors();
+
+    printf("\nEnter Doctor ID to remove: ");
+    scanf("%d", &doctor_id);
+
+    // Search for the doctor
+    for(int i = 0; i < doctor_count; i++) {
+        if(doctors[i].id == doctor_id) {
+            found = 1;
+
+            // Display doctor details
+            printf("\n========================================\n");
+            printf("           DOCTOR DETAILS               \n");
+            printf("========================================\n");
+            printf("ID             : %d\n", doctors[i].id);
+            printf("Name           : %s\n", doctors[i].name);
+            printf("Specialization : %s\n", doctors[i].specialization);
+            printf("Contact        : %s\n", doctors[i].contact);
+            printf("Availability   : %s\n", doctors[i].availability);
+            printf("========================================\n");
+
+            // Check if doctor has any appointments
+            int appointment_exists = 0;
+            for(int j = 0; j < appointment_count; j++) {
+                if(appointments[j].doctor_id == doctor_id) {
+                    appointment_exists = 1;
+                    break;
+                }
+            }
+
+            if(appointment_exists) {
+                printf("\n WARNING: This doctor has existing appointments!\n");
+            }
+
+            // Confirmation
+            printf("\n  Are you sure you want to remove this doctor? (y/n): ");
+            scanf(" %c", &confirm);
+
+            if(confirm == 'y' || confirm == 'Y') {
+                // Shift all doctors after this position
+                for(int j = i; j < doctor_count - 1; j++) {
+                    doctors[j] = doctors[j + 1];
+                }
+                doctor_count--;
+
+                saveData();  // Auto-save after deletion
+
+                printf("\n========================================\n");
+                printf("     DOCTOR REMOVED SUCCESSFULLY!     \n");
+                printf("========================================\n");
+                printf(" Total doctors now: %d\n", doctor_count);
+            } else {
+                printf("\n Operation cancelled.\n");
+            }
+
+            return;
+        }
+    }
+
+    if(!found) {
+        printf("\n Doctor with ID %d not found!\n", doctor_id);
+    }
+}
+
+// Modified addDoctor function (with better formatting)
+void addDoctor() {
+    if(doctor_count >= 100) {
+        printf("\n Doctor database full! Cannot add more doctors.\n");
+        return;
+    }
+
+    Doctor d;
+    d.id = getNewDoctorId();
+
+    printf("\n========================================\n");
+    printf("           ADD NEW DOCTOR               \n");
+    printf("========================================\n\n");
+
+    printf("Enter doctor name: ");
+    getchar();
+    fgets(d.name, 50, stdin);
+    d.name[strcspn(d.name, "\n")] = 0;
+
+    printf("Enter specialization: ");
+    fgets(d.specialization, 50, stdin);
+    d.specialization[strcspn(d.specialization, "\n")] = 0;
+
+    printf("Enter contact number: ");
+    fgets(d.contact, 15, stdin);
+    d.contact[strcspn(d.contact, "\n")] = 0;
+
+    printf("Enter availability (e.g., Mon-Fri 9AM-5PM): ");
+    fgets(d.availability, 50, stdin);
+    d.availability[strcspn(d.availability, "\n")] = 0;
+
+    doctors[doctor_count++] = d;
+
+    saveData();  // Auto-save
+
+    printf("\n========================================\n");
+    printf("     DOCTOR ADDED SUCCESSFULLY!       \n");
+    printf("========================================\n");
+    printf("Doctor ID      : %d\n", d.id);
+    printf("Name           : %s\n", d.name);
+    printf("Specialization : %s\n", d.specialization);
+    printf("Contact        : %s\n", d.contact);
+    printf("Availability   : %s\n", d.availability);
+    printf("========================================\n");
+    printf(" Total doctors: %d\n", doctor_count);
 }
