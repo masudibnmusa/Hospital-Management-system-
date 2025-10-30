@@ -685,23 +685,43 @@ void viewBills() {
 
 // Utility functions for generating IDs
 int getNewPatientId() {
-    static int last_id = 1000;
-    return ++last_id;
+    int max_id = 1000;
+    for(int i = 0; i < patient_count; i++) {
+        if(patients[i].id > max_id) {
+            max_id = patients[i].id;
+        }
+    }
+    return max_id + 1;
 }
 
 int getNewDoctorId() {
-    static int last_id = 100;
-    return ++last_id;
+    int max_id = 100;
+    for(int i = 0; i < doctor_count; i++) {
+        if(doctors[i].id > max_id) {
+            max_id = doctors[i].id;
+        }
+    }
+    return max_id + 1;
 }
 
 int getNewAppointmentId() {
-    static int last_id = 5000;
-    return ++last_id;
+    int max_id = 5000;
+    for(int i = 0; i < appointment_count; i++) {
+        if(appointments[i].id > max_id) {
+            max_id = appointments[i].id;
+        }
+    }
+    return max_id + 1;
 }
 
 int getNewBillNo() {
-    static int last_bill_no = 10000;
-    return ++last_bill_no;
+    int max_bill = 10000;
+    for(int i = 0; i < bill_count; i++) {
+        if(bills[i].bill_no > max_bill) {
+            max_bill = bills[i].bill_no;
+        }
+    }
+    return max_bill + 1;
 }
 
 // File handling functions
