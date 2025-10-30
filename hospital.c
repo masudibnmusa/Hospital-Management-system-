@@ -9,6 +9,17 @@
 #include <unistd.h>
 #endif
 
+// Color codes
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN    "\033[36m"
+#define WHITE   "\033[37m"
+#define BOLD    "\033[1m"
+
 // Cross-platform screen clear function
 #ifdef _WIN32
     #define CLEAR_SCREEN "cls"
@@ -127,25 +138,34 @@ void clearScreen() {
 // Utility function to pause screen
 void pauseScreen() {
     printf("\nPress Enter to continue...");
-    getchar();
-    getchar();
+
+    // Clear the input buffer first
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+
+    // Wait for Enter key
+    while (1) {
+        c = getchar();
+        if (c == '\n' || c == EOF) break;
+    }
 }
+
 
 int main() {
     loadData();
     int choice;
 
     clearScreen();
-    printf("========================================\n");
-    printf("   HOSPITAL MANAGEMENT SYSTEM          \n");
-    printf("========================================\n");
-    printf("\nPress Enter to continue...");
+    printf(CYAN "========================================\n");
+    printf(BOLD "   HOSPITAL MANAGEMENT SYSTEM          \n");
+    printf("========================================\n" RESET);
+    printf(GREEN "\nPress Enter to continue..." RESET);
     getchar();
 
     do {
         clearScreen();
         displayMenu();
-        printf("Enter your choice: ");
+        printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
 
         clearScreen();
@@ -195,13 +215,13 @@ int main() {
                 break;
             case 11:
                 saveData();
-                printf("========================================\n");
-                printf("   Thank you for using Hospital        \n");
+                printf(CYAN "========================================\n");
+                printf(GREEN "   Thank you for using Hospital        \n");
                 printf("      Management System!               \n");
-                printf("========================================\n");
+                printf("========================================\n" RESET);
                 break;
             default:
-                printf("Invalid choice! Please try again.\n");
+                printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
     } while(choice != 11);
@@ -210,11 +230,11 @@ int main() {
 }
 
 void displayMenu() {
-    printf("========================================\n");
-    printf("   HOSPITAL MANAGEMENT SYSTEM          \n");
-    printf("========================================\n");
-    printf("\n=== MAIN MENU ===\n");
-    printf("1. Add New Patient\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "   HOSPITAL MANAGEMENT SYSTEM          \n");
+    printf("========================================\n" RESET);
+    printf(YELLOW "\n=== MAIN MENU ===\n" RESET);
+    printf(GREEN "1. Add New Patient\n");
     printf("2. View All Patients\n");
     printf("3. Search Patient\n");
     printf("4. View All Doctors\n");
@@ -223,44 +243,44 @@ void displayMenu() {
     printf("7. View Appointments\n");
     printf("8. Generate Bill\n");
     printf("9. View Bills\n");
-    printf("10. Admin panel\n");
-    printf("11. Exit\n");
-    printf("========================================\n");
+    printf(YELLOW "10. Admin panel\n" RESET);
+    printf(RED "11. Exit\n" RESET);
+    printf(CYAN "========================================\n" RESET);
 }
 
 void addPatient() {
     if(patient_count >= 1000) {
-        printf("Patient database full!\n");
+        printf(RED "Patient database full!\n" RESET);
         return;
     }
 
     Patient p;
     p.id = getNewPatientId();
 
-    printf("========================================\n");
-    printf("        ADD NEW PATIENT                \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        ADD NEW PATIENT                \n");
+    printf("========================================\n\n" RESET);
 
-    printf("Enter patient name: ");
+    printf(BLUE "Enter patient name: " RESET);
     getchar();
     fgets(p.name, 50, stdin);
     p.name[strcspn(p.name, "\n")] = 0;
 
-    printf("Enter age: ");
+    printf(BLUE "Enter age: " RESET);
     scanf("%d", &p.age);
 
-    printf("Enter gender: ");
+    printf(BLUE "Enter gender: " RESET);
     scanf("%s", p.gender);
 
-    printf("Enter contact number: ");
+    printf(BLUE "Enter contact number: " RESET);
     scanf("%s", p.contact);
 
-    printf("Enter address: ");
+    printf(BLUE "Enter address: " RESET);
     getchar();
     fgets(p.address, 100, stdin);
     p.address[strcspn(p.address, "\n")] = 0;
 
-    printf("Enter medical history: ");
+    printf(BLUE "Enter medical history: " RESET);
     fgets(p.medical_history, 200, stdin);
     p.medical_history[strcspn(p.medical_history, "\n")] = 0;
 
@@ -268,84 +288,86 @@ void addPatient() {
 
     saveData();
 
-    printf("\n========================================\n");
+    printf(GREEN "\n========================================\n");
     printf("   PATIENT ADDED SUCCESSFULLY!         \n");
-    printf("========================================\n");
-    printf("Patient ID: %d\n", p.id);
-    printf("Name: %s\n", p.name);
-    printf("========================================\n");
+    printf("========================================\n" RESET);
+    printf("Patient ID: " YELLOW "%d\n" RESET, p.id);
+    printf("Name: " YELLOW "%s\n" RESET, p.name);
+    printf(CYAN "========================================\n" RESET);
 }
 
 void viewPatients() {
-    printf("========================================\n");
-    printf("        ALL PATIENTS                   \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        ALL PATIENTS                   \n");
+    printf("========================================\n\n" RESET);
 
     if(patient_count == 0) {
-        printf("No patients found!\n");
+        printf(RED "No patients found!\n" RESET);
         return;
     }
 
-    printf("ID\tName\t\t\tAge\tGender\tContact\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "ID\tName\t\t\tAge\tGender\tContact\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
 
     for(int i = 0; i < patient_count; i++) {
-        printf("%d\t%-20s\t%d\t%s\t%s\n",
-               patients[i].id, patients[i].name, patients[i].age,
-               patients[i].gender, patients[i].contact);
+        printf(GREEN "%d\t" RESET, patients[i].id);
+        printf(CYAN "%-20s\t" RESET, patients[i].name);
+        printf("%d\t" RESET, patients[i].age);
+        printf(MAGENTA "%s\t" RESET, patients[i].gender);
+        printf(BLUE "%s\n" RESET, patients[i].contact);
     }
 }
 
 void searchPatient() {
-    printf("========================================\n");
-    printf("        SEARCH PATIENT                 \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        SEARCH PATIENT                 \n");
+    printf("========================================\n\n" RESET);
 
     if(patient_count == 0) {
-        printf("No patients found!\n");
+        printf(RED "No patients found!\n" RESET);
         return;
     }
 
     int choice;
-    printf("1. Search by ID\n");
+    printf(YELLOW "1. Search by ID\n");
     printf("2. Search by Name\n");
-    printf("Enter choice: ");
+    printf(BLUE "Enter choice: " RESET);
     scanf("%d", &choice);
 
     clearScreen();
 
     if(choice == 1) {
         int id;
-        printf("========================================\n");
-        printf("      SEARCH PATIENT BY ID             \n");
-        printf("========================================\n\n");
-        printf("Enter patient ID: ");
+        printf(CYAN "========================================\n");
+        printf(BOLD "      SEARCH PATIENT BY ID             \n");
+        printf("========================================\n\n" RESET);
+        printf(BLUE "Enter patient ID: " RESET);
         scanf("%d", &id);
 
         for(int i = 0; i < patient_count; i++) {
             if(patients[i].id == id) {
-                printf("\n========================================\n");
+                printf(GREEN "\n========================================\n");
                 printf("        PATIENT FOUND                  \n");
-                printf("========================================\n");
-                printf("ID: %d\n", patients[i].id);
-                printf("Name: %s\n", patients[i].name);
-                printf("Age: %d\n", patients[i].age);
-                printf("Gender: %s\n", patients[i].gender);
-                printf("Contact: %s\n", patients[i].contact);
-                printf("Address: %s\n", patients[i].address);
-                printf("Medical History: %s\n", patients[i].medical_history);
-                printf("========================================\n");
+                printf("========================================\n" RESET);
+                printf("ID: " YELLOW "%d\n" RESET, patients[i].id);
+                printf("Name: " YELLOW "%s\n" RESET, patients[i].name);
+                printf("Age: " YELLOW "%d\n" RESET, patients[i].age);
+                printf("Gender: " YELLOW "%s\n" RESET, patients[i].gender);
+                printf("Contact: " YELLOW "%s\n" RESET, patients[i].contact);
+                printf("Address: " YELLOW "%s\n" RESET, patients[i].address);
+                printf("Medical History: " YELLOW "%s\n" RESET, patients[i].medical_history);
+                printf(CYAN "========================================\n" RESET);
                 return;
             }
         }
-        printf("\nPatient not found!\n");
+        printf(RED "\nPatient not found!\n" RESET);
     }
     else if(choice == 2) {
         char name[50];
-        printf("========================================\n");
-        printf("      SEARCH PATIENT BY NAME           \n");
-        printf("========================================\n\n");
-        printf("Enter patient name: ");
+        printf(CYAN "========================================\n");
+        printf(BOLD "      SEARCH PATIENT BY NAME           \n");
+        printf("========================================\n\n" RESET);
+        printf(BLUE "Enter patient name: " RESET);
         getchar();
         fgets(name, 50, stdin);
         name[strcspn(name, "\n")] = 0;
@@ -354,94 +376,97 @@ void searchPatient() {
         for(int i = 0; i < patient_count; i++) {
             if(strstr(patients[i].name, name) != NULL) {
                 if(!found) {
-                    printf("\nSearch Results:\n");
+                    printf(YELLOW "\nSearch Results:\n");
                     printf("ID\tName\t\t\tAge\tGender\tContact\n");
-                    printf("------------------------------------------------------------------------\n");
+                    printf("------------------------------------------------------------------------\n" RESET);
                     found = 1;
                 }
-                printf("%d\t%-20s\t%d\t%s\t%s\n",
-                       patients[i].id, patients[i].name, patients[i].age,
-                       patients[i].gender, patients[i].contact);
+                printf(GREEN "%d\t" RESET, patients[i].id);
+                printf(CYAN "%-20s\t" RESET, patients[i].name);
+                printf("%d\t" RESET, patients[i].age);
+                printf(MAGENTA "%s\t" RESET, patients[i].gender);
+                printf(BLUE "%s\n" RESET, patients[i].contact);
             }
         }
         if(!found) {
-            printf("\nPatient not found!\n");
+            printf(RED "\nPatient not found!\n" RESET);
         }
     }
     else {
-        printf("Invalid choice!\n");
+        printf(RED "Invalid choice!\n" RESET);
     }
 }
 
 void viewDoctors() {
-    printf("========================================\n");
-    printf("        ALL DOCTORS                    \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        ALL DOCTORS                    \n");
+    printf("========================================\n\n" RESET);
 
     if(doctor_count == 0) {
-        printf("No doctors found!\n");
+        printf(RED "No doctors found!\n" RESET);
         return;
     }
 
-    printf("ID\tName\t\t\tSpecialization\t\tContact\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "ID\tName\t\t\tSpecialization\t\tContact\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
 
     for(int i = 0; i < doctor_count; i++) {
-        printf("%d\t%-20s\t%-20s\t%s\n",
-               doctors[i].id, doctors[i].name, doctors[i].specialization,
-               doctors[i].contact);
+        printf(GREEN "%d\t" RESET, doctors[i].id);
+        printf(CYAN "%-20s\t" RESET, doctors[i].name);
+        printf(MAGENTA "%-20s\t" RESET, doctors[i].specialization);
+        printf(BLUE "%s\n" RESET, doctors[i].contact);
     }
 }
 
 void searchDoctor() {
-    printf("========================================\n");
-    printf("        SEARCH DOCTOR                  \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        SEARCH DOCTOR                  \n");
+    printf("========================================\n\n" RESET);
 
     if(doctor_count == 0) {
-        printf("No doctors found!\n");
+        printf(RED "No doctors found!\n" RESET);
         return;
     }
 
     int choice;
-    printf("1. Search by ID\n");
+    printf(YELLOW "1. Search by ID\n");
     printf("2. Search by Name\n");
     printf("3. Search by Specialization\n");
-    printf("Enter choice: ");
+    printf(BLUE "Enter choice: " RESET);
     scanf("%d", &choice);
 
     clearScreen();
 
     if(choice == 1) {
         int id;
-        printf("========================================\n");
-        printf("      SEARCH DOCTOR BY ID              \n");
-        printf("========================================\n\n");
-        printf("Enter doctor ID: ");
+        printf(CYAN "========================================\n");
+        printf(BOLD "      SEARCH DOCTOR BY ID              \n");
+        printf("========================================\n\n" RESET);
+        printf(BLUE "Enter doctor ID: " RESET);
         scanf("%d", &id);
 
         for(int i = 0; i < doctor_count; i++) {
             if(doctors[i].id == id) {
-                printf("\n========================================\n");
+                printf(GREEN "\n========================================\n");
                 printf("        DOCTOR FOUND                   \n");
-                printf("========================================\n");
-                printf("ID: %d\n", doctors[i].id);
-                printf("Name: %s\n", doctors[i].name);
-                printf("Specialization: %s\n", doctors[i].specialization);
-                printf("Contact: %s\n", doctors[i].contact);
-                printf("Availability: %s\n", doctors[i].availability);
-                printf("========================================\n");
+                printf("========================================\n" RESET);
+                printf("ID: " YELLOW "%d\n" RESET, doctors[i].id);
+                printf("Name: " YELLOW "%s\n" RESET, doctors[i].name);
+                printf("Specialization: " YELLOW "%s\n" RESET, doctors[i].specialization);
+                printf("Contact: " YELLOW "%s\n" RESET, doctors[i].contact);
+                printf("Availability: " YELLOW "%s\n" RESET, doctors[i].availability);
+                printf(CYAN "========================================\n" RESET);
                 return;
             }
         }
-        printf("\nDoctor not found!\n");
+        printf(RED "\nDoctor not found!\n" RESET);
     }
     else if(choice == 2) {
         char name[50];
-        printf("========================================\n");
-        printf("      SEARCH DOCTOR BY NAME            \n");
-        printf("========================================\n\n");
-        printf("Enter doctor name: ");
+        printf(CYAN "========================================\n");
+        printf(BOLD "      SEARCH DOCTOR BY NAME            \n");
+        printf("========================================\n\n" RESET);
+        printf(BLUE "Enter doctor name: " RESET);
         getchar();
         fgets(name, 50, stdin);
         name[strcspn(name, "\n")] = 0;
@@ -450,26 +475,27 @@ void searchDoctor() {
         for(int i = 0; i < doctor_count; i++) {
             if(strstr(doctors[i].name, name) != NULL) {
                 if(!found) {
-                    printf("\nSearch Results:\n");
+                    printf(YELLOW "\nSearch Results:\n");
                     printf("ID\tName\t\t\tSpecialization\t\tContact\n");
-                    printf("------------------------------------------------------------------------\n");
+                    printf("------------------------------------------------------------------------\n" RESET);
                     found = 1;
                 }
-                printf("%d\t%-20s\t%-20s\t%s\n",
-                       doctors[i].id, doctors[i].name, doctors[i].specialization,
-                       doctors[i].contact);
+                printf(GREEN "%d\t" RESET, doctors[i].id);
+                printf(CYAN "%-20s\t" RESET, doctors[i].name);
+                printf(MAGENTA "%-20s\t" RESET, doctors[i].specialization);
+                printf(BLUE "%s\n" RESET, doctors[i].contact);
             }
         }
         if(!found) {
-            printf("\nDoctor not found!\n");
+            printf(RED "\nDoctor not found!\n" RESET);
         }
     }
     else if(choice == 3) {
         char specialization[50];
-        printf("========================================\n");
-        printf("   SEARCH DOCTOR BY SPECIALIZATION     \n");
-        printf("========================================\n\n");
-        printf("Enter specialization: ");
+        printf(CYAN "========================================\n");
+        printf(BOLD "   SEARCH DOCTOR BY SPECIALIZATION     \n");
+        printf("========================================\n\n" RESET);
+        printf(BLUE "Enter specialization: " RESET);
         getchar();
         fgets(specialization, 50, stdin);
         specialization[strcspn(specialization, "\n")] = 0;
@@ -478,62 +504,63 @@ void searchDoctor() {
         for(int i = 0; i < doctor_count; i++) {
             if(strstr(doctors[i].specialization, specialization) != NULL) {
                 if(!found) {
-                    printf("\nSearch Results:\n");
+                    printf(YELLOW "\nSearch Results:\n");
                     printf("ID\tName\t\t\tSpecialization\t\tContact\n");
-                    printf("------------------------------------------------------------------------\n");
+                    printf("------------------------------------------------------------------------\n" RESET);
                     found = 1;
                 }
-                printf("%d\t%-20s\t%-20s\t%s\n",
-                       doctors[i].id, doctors[i].name, doctors[i].specialization,
-                       doctors[i].contact);
+                printf(GREEN "%d\t" RESET, doctors[i].id);
+                printf(CYAN "%-20s\t" RESET, doctors[i].name);
+                printf(MAGENTA "%-20s\t" RESET, doctors[i].specialization);
+                printf(BLUE "%s\n" RESET, doctors[i].contact);
             }
         }
         if(!found) {
-            printf("\nNo doctors found with this specialization!\n");
+            printf(RED "\nNo doctors found with this specialization!\n" RESET);
         }
     }
     else {
-        printf("Invalid choice!\n");
+        printf(RED "Invalid choice!\n" RESET);
     }
 }
 
 void scheduleAppointment() {
-    printf("========================================\n");
-    printf("      SCHEDULE APPOINTMENT             \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "      SCHEDULE APPOINTMENT             \n");
+    printf("========================================\n\n" RESET);
 
     if(appointment_count >= 500) {
-        printf("Appointment database full!\n");
+        printf(RED "Appointment database full!\n" RESET);
         return;
     }
 
     if(patient_count == 0 || doctor_count == 0) {
-        printf("No patients or doctors available!\n");
+        printf(RED "No patients or doctors available!\n" RESET);
         return;
     }
 
     Appointment a;
     a.id = getNewAppointmentId();
 
-    printf("Available Patients:\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "Available Patients:\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
     viewPatients();
-    printf("\nEnter patient ID: ");
+    printf(BLUE "\nEnter patient ID: " RESET);
     scanf("%d", &a.patient_id);
 
-    printf("\nAvailable Doctors:\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "\nAvailable Doctors:\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
     viewDoctors();
-    printf("\nEnter doctor ID: ");
+    printf(BLUE "\nEnter doctor ID: " RESET);
     scanf("%d", &a.doctor_id);
 
-    printf("\nEnter date (DD/MM/YYYY): ");
+    printf(BLUE "\nEnter date (DD/MM/YYYY): " RESET);
     scanf("%s", a.date);
 
-    printf("Enter time (HH:MM): ");
+    printf(BLUE "Enter time (HH:MM): " RESET);
     scanf("%s", a.time);
 
-    printf("Enter purpose: ");
+    printf(BLUE "Enter purpose: " RESET);
     getchar();
     fgets(a.purpose, 100, stdin);
     a.purpose[strcspn(a.purpose, "\n")] = 0;
@@ -544,73 +571,75 @@ void scheduleAppointment() {
 
     saveData();
 
-    printf("\n========================================\n");
+    printf(GREEN "\n========================================\n");
     printf("  APPOINTMENT SCHEDULED SUCCESSFULLY!  \n");
-    printf("========================================\n");
-    printf("Appointment ID: %d\n", a.id);
-    printf("Date: %s\n", a.date);
-    printf("Time: %s\n", a.time);
-    printf("========================================\n");
+    printf("========================================\n" RESET);
+    printf("Appointment ID: " YELLOW "%d\n" RESET, a.id);
+    printf("Date: " YELLOW "%s\n" RESET, a.date);
+    printf("Time: " YELLOW "%s\n" RESET, a.time);
+    printf(CYAN "========================================\n" RESET);
 }
 
 void viewAppointments() {
-    printf("========================================\n");
-    printf("        ALL APPOINTMENTS               \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        ALL APPOINTMENTS               \n");
+    printf("========================================\n\n" RESET);
 
     if(appointment_count == 0) {
-        printf("No appointments found!\n");
+        printf(RED "No appointments found!\n" RESET);
         return;
     }
 
-    printf("ID\tPatient ID\tDoctor ID\tDate\t\tTime\tStatus\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "ID\tPatient ID\tDoctor ID\tDate\t\tTime\tStatus\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
 
     for(int i = 0; i < appointment_count; i++) {
-        printf("%d\t%d\t\t%d\t\t%s\t%s\t%s\n",
-               appointments[i].id, appointments[i].patient_id,
-               appointments[i].doctor_id, appointments[i].date,
-               appointments[i].time, appointments[i].status);
+        printf(GREEN "%d\t" RESET, appointments[i].id);
+        printf("%d\t\t" RESET, appointments[i].patient_id);
+        printf("%d\t\t" RESET, appointments[i].doctor_id);
+        printf(CYAN "%s\t" RESET, appointments[i].date);
+        printf(MAGENTA "%s\t" RESET, appointments[i].time);
+        printf(BLUE "%s\n" RESET, appointments[i].status);
     }
 }
 
 void generateBill() {
-    printf("========================================\n");
-    printf("        GENERATE BILL                  \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        GENERATE BILL                  \n");
+    printf("========================================\n\n" RESET);
 
     if(bill_count >= 300) {
-        printf("Bill database full!\n");
+        printf(RED "Bill database full!\n" RESET);
         return;
     }
 
     if(patient_count == 0) {
-        printf("No patients available!\n");
+        printf(RED "No patients available!\n" RESET);
         return;
     }
 
     Bill b;
     b.bill_no = getNewBillNo();
 
-    printf("Available Patients:\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "Available Patients:\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
     viewPatients();
-    printf("\nEnter patient ID: ");
+    printf(BLUE "\nEnter patient ID: " RESET);
     scanf("%d", &b.patient_id);
 
-    printf("\nEnter consultation fee: ");
+    printf(BLUE "\nEnter consultation fee: " RESET);
     scanf("%f", &b.consultation_fee);
 
-    printf("Enter medicine charges: ");
+    printf(BLUE "Enter medicine charges: " RESET);
     scanf("%f", &b.medicine_charges);
 
-    printf("Enter room charges: ");
+    printf(BLUE "Enter room charges: " RESET);
     scanf("%f", &b.room_charges);
 
-    printf("Enter lab charges: ");
+    printf(BLUE "Enter lab charges: " RESET);
     scanf("%f", &b.lab_charges);
 
-    printf("Enter date (DD/MM/YYYY): ");
+    printf(BLUE "Enter date (DD/MM/YYYY): " RESET);
     scanf("%s", b.date);
 
     b.total_amount = b.consultation_fee + b.medicine_charges +
@@ -674,45 +703,47 @@ void generateBill() {
 
     // Display on screen
     clearScreen();
-    printf("\n===============================================\n");
+    printf(GREEN "\n===============================================\n");
     printf("          BILL GENERATED SUCCESSFULLY         \n");
-    printf("===============================================\n\n");
-    printf("Bill Number      : %d\n", b.bill_no);
-    printf("Patient ID       : %d\n", b.patient_id);
-    printf("Patient Name     : %s\n", patient_name);
-    printf("Date             : %s\n\n", b.date);
-    printf("-----------------------------------------------\n");
+    printf("===============================================\n\n" RESET);
+    printf("Bill Number      : " YELLOW "%d\n" RESET, b.bill_no);
+    printf("Patient ID       : " YELLOW "%d\n" RESET, b.patient_id);
+    printf("Patient Name     : " YELLOW "%s\n" RESET, patient_name);
+    printf("Date             : " YELLOW "%s\n\n" RESET, b.date);
+    printf(CYAN "-----------------------------------------------\n");
     printf("            CHARGES BREAKDOWN                  \n");
-    printf("-----------------------------------------------\n");
-    printf("Consultation Fee : $%.2f\n", b.consultation_fee);
-    printf("Medicine Charges : $%.2f\n", b.medicine_charges);
-    printf("Room Charges     : $%.2f\n", b.room_charges);
-    printf("Lab Charges      : $%.2f\n", b.lab_charges);
-    printf("-----------------------------------------------\n");
+    printf("-----------------------------------------------\n" RESET);
+    printf("Consultation Fee : " GREEN "$%.2f\n" RESET, b.consultation_fee);
+    printf("Medicine Charges : " GREEN "$%.2f\n" RESET, b.medicine_charges);
+    printf("Room Charges     : " GREEN "$%.2f\n" RESET, b.room_charges);
+    printf("Lab Charges      : " GREEN "$%.2f\n" RESET, b.lab_charges);
+    printf(YELLOW "-----------------------------------------------\n");
     printf("TOTAL AMOUNT     : $%.2f\n", b.total_amount);
-    printf("-----------------------------------------------\n");
-    printf("Status           : %s\n", b.status);
-    printf("\nBill saved as    : %s\n", filename);
-    printf("===============================================\n");
+    printf("-----------------------------------------------\n" RESET);
+    printf("Status           : " BLUE "%s\n" RESET, b.status);
+    printf("\nBill saved as    : " CYAN "%s\n" RESET, filename);
+    printf(CYAN "===============================================\n" RESET);
 }
 
 void viewBills() {
-    printf("========================================\n");
-    printf("        ALL BILLS                      \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "        ALL BILLS                      \n");
+    printf("========================================\n\n" RESET);
 
     if(bill_count == 0) {
-        printf("No bills found!\n");
+        printf(RED "No bills found!\n" RESET);
         return;
     }
 
-    printf("Bill No\tPatient ID\tTotal Amount\tDate\t\tStatus\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "Bill No\tPatient ID\tTotal Amount\tDate\t\tStatus\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
 
     for(int i = 0; i < bill_count; i++) {
-        printf("%d\t%d\t\t$%.2f\t\t%s\t%s\n",
-               bills[i].bill_no, bills[i].patient_id,
-               bills[i].total_amount, bills[i].date, bills[i].status);
+        printf(GREEN "%d\t" RESET, bills[i].bill_no);
+        printf("%d\t\t" RESET, bills[i].patient_id);
+        printf(YELLOW "$%.2f\t\t" RESET, bills[i].total_amount);
+        printf(CYAN "%s\t" RESET, bills[i].date);
+        printf(BLUE "%s\n" RESET, bills[i].status);
     }
 }
 
@@ -874,7 +905,7 @@ void getPasswordWithMask(char *password, int max_length) {
     int i = 0;
     char ch;
 
-    printf("Password: ");
+    printf(BLUE "Password: " RESET);
 
     while (1) {
         #ifdef _WIN32
@@ -907,7 +938,7 @@ void getPasswordWithMask(char *password, int max_length) {
         // Regular character input
         else if (i < max_length - 1) {
             password[i++] = ch;
-            printf("*");
+            printf(YELLOW "*" RESET);
         }
     }
 
@@ -921,27 +952,27 @@ int adminLogin() {
     char password[50];
     int attempts = 0;
 
-    printf("========================================\n");
-    printf("          ADMIN LOGIN PANEL            \n");
-    printf("========================================\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "          ADMIN LOGIN PANEL            \n");
+    printf("========================================\n" RESET);
 
     while(attempts < 3) {
-        printf("\nUsername: ");
+        printf(BLUE "\nUsername: " RESET);
         scanf("%s", username);
 
         // Use the password masking function
         getPasswordWithMask(password, 50);
 
         if(strcmp(username, "admin") == 0 && strcmp(password, "admin123") == 0) {
-            printf("\nLogin Successful! Welcome Admin!\n");
+            printf(GREEN "\nLogin Successful! Welcome Admin!\n" RESET);
             return 1;
         } else {
             attempts++;
-            printf("Invalid credentials! Attempts remaining: %d\n", 3 - attempts);
+            printf(RED "Invalid credentials! Attempts remaining: %d\n" RESET, 3 - attempts);
         }
     }
 
-    printf("\nAccess Denied! Too many failed attempts.\n");
+    printf(RED "\nAccess Denied! Too many failed attempts.\n" RESET);
     return 0;
 }
 
@@ -951,17 +982,17 @@ void adminMenu() {
 
     do {
         clearScreen();
-        printf("========================================\n");
-        printf("             ADMIN PANEL                \n");
-        printf("========================================\n");
-        printf("  1. Add New Doctor                    \n");
+        printf(CYAN "========================================\n");
+        printf(BOLD "             ADMIN PANEL                \n");
+        printf("========================================\n" RESET);
+        printf(GREEN "  1. Add New Doctor                    \n");
         printf("  2. Remove Doctor                     \n");
         printf("  3. View All Doctors                  \n");
         printf("  4. Search Doctor                     \n");
-        printf("  5. Staff Management                  \n");
-        printf("  6. Logout                            \n");
-        printf("========================================\n");
-        printf("Enter your choice: ");
+        printf(YELLOW "  5. Staff Management                  \n" RESET);
+        printf(RED "  6. Logout                            \n" RESET);
+        printf(CYAN "========================================\n" RESET);
+        printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
 
         clearScreen();
@@ -988,12 +1019,12 @@ void adminMenu() {
                 pauseScreen();
                 break;
             case 6:
-                printf("========================================\n");
+                printf(GREEN "========================================\n");
                 printf("    Logged out successfully!           \n");
-                printf("========================================\n");
+                printf("========================================\n" RESET);
                 break;
             default:
-                printf("Invalid choice! Please try again.\n");
+                printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
     } while(choice != 6);
@@ -1003,18 +1034,18 @@ void staffManagementMenu() {
     int choice;
     do {
         clearScreen();
-        printf("========================================\n");
-        printf("           STAFF MANAGEMENT            \n");
-        printf("========================================\n");
-        printf("  1. Add New Staff                     \n");
+        printf(CYAN "========================================\n");
+        printf(BOLD "           STAFF MANAGEMENT            \n");
+        printf("========================================\n" RESET);
+        printf(GREEN "  1. Add New Staff                     \n");
         printf("  2. View All Staff                    \n");
         printf("  3. Edit Staff Information            \n");
         printf("  4. Delete Staff                      \n");
-        printf("  5. Assign Duty Roster                \n");
-        printf("  6. Search Staff                      \n");
-        printf("  7. Back to Admin Menu                \n");
-        printf("========================================\n");
-        printf("Enter your choice: ");
+        printf(YELLOW "  5. Assign Duty Roster                \n");
+        printf("  6. Search Staff                      \n" RESET);
+        printf(RED "  7. Back to Admin Menu                \n" RESET);
+        printf(CYAN "========================================\n" RESET);
+        printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
 
         clearScreen();
@@ -1032,8 +1063,8 @@ void staffManagementMenu() {
             break;
             case 6: searchStaff();
             break;
-            case 7: printf("Returning to Admin Menu...\n"); break;
-            default: printf("Invalid choice!\n");
+            case 7: printf(GREEN "Returning to Admin Menu...\n" RESET); break;
+            default: printf(RED "Invalid choice!\n" RESET);
         }
         if(choice != 7) pauseScreen();
     } while(choice != 7);
@@ -1041,12 +1072,12 @@ void staffManagementMenu() {
 
 // Remove Doctor Function
 void removeDoctor() {
-    printf("========================================\n");
-    printf("            REMOVE DOCTOR               \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "            REMOVE DOCTOR               \n");
+    printf("========================================\n\n" RESET);
 
     if(doctor_count == 0) {
-        printf("No doctors available to remove!\n");
+        printf(RED "No doctors available to remove!\n" RESET);
         return;
     }
 
@@ -1055,11 +1086,11 @@ void removeDoctor() {
     char confirm;
 
     // Show all doctors
-    printf("Available Doctors:\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "Available Doctors:\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
     viewDoctors();
 
-    printf("\nEnter Doctor ID to remove: ");
+    printf(BLUE "\nEnter Doctor ID to remove: " RESET);
     scanf("%d", &doctor_id);
 
     // Search for the doctor
@@ -1070,15 +1101,15 @@ void removeDoctor() {
             clearScreen();
 
             // Display doctor details
-            printf("========================================\n");
-            printf("           DOCTOR DETAILS               \n");
-            printf("========================================\n");
-            printf("ID             : %d\n", doctors[i].id);
-            printf("Name           : %s\n", doctors[i].name);
-            printf("Specialization : %s\n", doctors[i].specialization);
-            printf("Contact        : %s\n", doctors[i].contact);
-            printf("Availability   : %s\n", doctors[i].availability);
-            printf("========================================\n");
+            printf(CYAN "========================================\n");
+            printf(BOLD "           DOCTOR DETAILS               \n");
+            printf("========================================\n" RESET);
+            printf("ID             : " YELLOW "%d\n" RESET, doctors[i].id);
+            printf("Name           : " YELLOW "%s\n" RESET, doctors[i].name);
+            printf("Specialization : " YELLOW "%s\n" RESET, doctors[i].specialization);
+            printf("Contact        : " YELLOW "%s\n" RESET, doctors[i].contact);
+            printf("Availability   : " YELLOW "%s\n" RESET, doctors[i].availability);
+            printf(CYAN "========================================\n" RESET);
 
             // Check if doctor has any appointments
             int appointment_exists = 0;
@@ -1090,11 +1121,11 @@ void removeDoctor() {
             }
 
             if(appointment_exists) {
-                printf("\nWARNING: This doctor has existing appointments!\n");
+                printf(RED "\nWARNING: This doctor has existing appointments!\n" RESET);
             }
 
             // Confirmation
-            printf("\n  Are you sure you want to remove this doctor? (y/n): ");
+            printf(YELLOW "\n  Are you sure you want to remove this doctor? (y/n): " RESET);
             scanf(" %c", &confirm);
 
             if(confirm == 'y' || confirm == 'Y') {
@@ -1107,12 +1138,12 @@ void removeDoctor() {
                 saveData();  // Auto-save after deletion
 
                 clearScreen();
-                printf("========================================\n");
+                printf(GREEN "========================================\n");
                 printf("     DOCTOR REMOVED SUCCESSFULLY!     \n");
-                printf("========================================\n");
-                printf("Total doctors now: %d\n", doctor_count);
+                printf("========================================\n" RESET);
+                printf("Total doctors now: " YELLOW "%d\n" RESET, doctor_count);
             } else {
-                printf("\nOperation cancelled.\n");
+                printf(YELLOW "\nOperation cancelled.\n" RESET);
             }
 
             return;
@@ -1120,38 +1151,38 @@ void removeDoctor() {
     }
 
     if(!found) {
-        printf("\nDoctor with ID %d not found!\n", doctor_id);
+        printf(RED "\nDoctor with ID %d not found!\n" RESET, doctor_id);
     }
 }
 
 // Modified addDoctor function (with better formatting)
 void addDoctor() {
-    printf("========================================\n");
-    printf("           ADD NEW DOCTOR               \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "           ADD NEW DOCTOR               \n");
+    printf("========================================\n\n" RESET);
 
     if(doctor_count >= 100) {
-        printf("Doctor database full! Cannot add more doctors.\n");
+        printf(RED "Doctor database full! Cannot add more doctors.\n" RESET);
         return;
     }
 
     Doctor d;
     d.id = getNewDoctorId();
 
-    printf("Enter doctor name: ");
+    printf(BLUE "Enter doctor name: " RESET);
     getchar();
     fgets(d.name, 50, stdin);
     d.name[strcspn(d.name, "\n")] = 0;
 
-    printf("Enter specialization: ");
+    printf(BLUE "Enter specialization: " RESET);
     fgets(d.specialization, 50, stdin);
     d.specialization[strcspn(d.specialization, "\n")] = 0;
 
-    printf("Enter contact number: ");
+    printf(BLUE "Enter contact number: " RESET);
     fgets(d.contact, 15, stdin);
     d.contact[strcspn(d.contact, "\n")] = 0;
 
-    printf("Enter availability (e.g., Mon-Fri 9AM-5PM): ");
+    printf(BLUE "Enter availability (e.g., Mon-Fri 9AM-5PM): " RESET);
     fgets(d.availability, 50, stdin);
     d.availability[strcspn(d.availability, "\n")] = 0;
 
@@ -1160,71 +1191,71 @@ void addDoctor() {
     saveData();  // Auto-save
 
     clearScreen();
-    printf("========================================\n");
+    printf(GREEN "========================================\n");
     printf("     DOCTOR ADDED SUCCESSFULLY!       \n");
-    printf("========================================\n");
-    printf("Doctor ID      : %d\n", d.id);
-    printf("Name           : %s\n", d.name);
-    printf("Specialization : %s\n", d.specialization);
-    printf("Contact        : %s\n", d.contact);
-    printf("Availability   : %s\n", d.availability);
-    printf("========================================\n");
-    printf("Total doctors: %d\n", doctor_count);
+    printf("========================================\n" RESET);
+    printf("Doctor ID      : " YELLOW "%d\n" RESET, d.id);
+    printf("Name           : " YELLOW "%s\n" RESET, d.name);
+    printf("Specialization : " YELLOW "%s\n" RESET, d.specialization);
+    printf("Contact        : " YELLOW "%s\n" RESET, d.contact);
+    printf("Availability   : " YELLOW "%s\n" RESET, d.availability);
+    printf(CYAN "========================================\n" RESET);
+    printf("Total doctors: " YELLOW "%d\n" RESET, doctor_count);
 
 }
 
 // Add new staff member
 void addStaff() {
-    printf("========================================\n");
-    printf("           ADD NEW STAFF               \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "           ADD NEW STAFF               \n");
+    printf("========================================\n\n" RESET);
 
     if(staff_count >= 200) {
-        printf("Staff database full! Cannot add more staff.\n");
+        printf(RED "Staff database full! Cannot add more staff.\n" RESET);
         return;
     }
 
     Staff s;
     s.id = getNewStaffId();
 
-    printf("Enter staff name: ");
+    printf(BLUE "Enter staff name: " RESET);
     getchar();
     fgets(s.name, 50, stdin);
     s.name[strcspn(s.name, "\n")] = 0;
 
-    printf("Enter role (Nurse/Receptionist/Technician/etc.): ");
+    printf(BLUE "Enter role (Nurse/Receptionist/Technician/etc.): " RESET);
     fgets(s.role, 30, stdin);
     s.role[strcspn(s.role, "\n")] = 0;
 
-    printf("Enter department: ");
+    printf(BLUE "Enter department: " RESET);
     fgets(s.department, 50, stdin);
     s.department[strcspn(s.department, "\n")] = 0;
 
-    printf("Enter contact number: ");
+    printf(BLUE "Enter contact number: " RESET);
     fgets(s.contact, 15, stdin);
     s.contact[strcspn(s.contact, "\n")] = 0;
 
-    printf("Enter email: ");
+    printf(BLUE "Enter email: " RESET);
     fgets(s.email, 50, stdin);
     s.email[strcspn(s.email, "\n")] = 0;
 
-    printf("Enter address: ");
+    printf(BLUE "Enter address: " RESET);
     fgets(s.address, 100, stdin);
     s.address[strcspn(s.address, "\n")] = 0;
 
-    printf("Enter qualification: ");
+    printf(BLUE "Enter qualification: " RESET);
     fgets(s.qualification, 100, stdin);
     s.qualification[strcspn(s.qualification, "\n")] = 0;
 
-    printf("Enter salary: ");
+    printf(BLUE "Enter salary: " RESET);
     scanf("%f", &s.salary);
 
-    printf("Enter join date (DD/MM/YYYY): ");
+    printf(BLUE "Enter join date (DD/MM/YYYY): " RESET);
     getchar();
     fgets(s.join_date, 20, stdin);
     s.join_date[strcspn(s.join_date, "\n")] = 0;
 
-    printf("Enter default shift (Morning/Evening/Night): ");
+    printf(BLUE "Enter default shift (Morning/Evening/Night): " RESET);
     fgets(s.shift, 20, stdin);
     s.shift[strcspn(s.shift, "\n")] = 0;
 
@@ -1233,70 +1264,72 @@ void addStaff() {
     staff[staff_count++] = s;
     saveStaffData();
 
-    printf("\n========================================\n");
+    printf(GREEN "\n========================================\n");
     printf("     STAFF ADDED SUCCESSFULLY!        \n");
-    printf("========================================\n");
-    printf("Staff ID     : %d\n", s.id);
-    printf("Name         : %s\n", s.name);
-    printf("Role         : %s\n", s.role);
-    printf("Department   : %s\n", s.department);
-    printf("Contact      : %s\n", s.contact);
-    printf("========================================\n");
+    printf("========================================\n" RESET);
+    printf("Staff ID     : " YELLOW "%d\n" RESET, s.id);
+    printf("Name         : " YELLOW "%s\n" RESET, s.name);
+    printf("Role         : " YELLOW "%s\n" RESET, s.role);
+    printf("Department   : " YELLOW "%s\n" RESET, s.department);
+    printf("Contact      : " YELLOW "%s\n" RESET, s.contact);
+    printf(CYAN "========================================\n" RESET);
 }
 
 // View all staff members
 void viewStaff() {
-    printf("========================================\n");
-    printf("            ALL STAFF MEMBERS          \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "            ALL STAFF MEMBERS          \n");
+    printf("========================================\n\n" RESET);
 
     if(staff_count == 0) {
-        printf("No staff members found!\n");
+        printf(RED "No staff members found!\n" RESET);
         return;
     }
 
-    printf("ID\tName\t\t\tRole\t\tDepartment\t\tContact\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "ID\tName\t\t\tRole\t\tDepartment\t\tContact\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
 
     for(int i = 0; i < staff_count; i++) {
-        printf("%d\t%-20s\t%-15s\t%-20s\t%s\n",
-               staff[i].id, staff[i].name, staff[i].role,
-               staff[i].department, staff[i].contact);
+        printf(GREEN "%d\t" RESET, staff[i].id);
+        printf(CYAN "%-20s\t" RESET, staff[i].name);
+        printf(MAGENTA "%-15s\t" RESET, staff[i].role);
+        printf(BLUE "%-20s\t" RESET, staff[i].department);
+        printf(YELLOW "%s\n" RESET, staff[i].contact);
     }
 
-    printf("\nTotal staff members: %d\n", staff_count);
+    printf("\nTotal staff members: " YELLOW "%d\n" RESET, staff_count);
 }
 
 // Edit staff information
 void editStaff() {
-    printf("========================================\n");
-    printf("           EDIT STAFF INFORMATION      \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "           EDIT STAFF INFORMATION      \n");
+    printf("========================================\n\n" RESET);
 
     if(staff_count == 0) {
-        printf("No staff members available!\n");
+        printf(RED "No staff members available!\n" RESET);
         return;
     }
 
     int staff_id;
     int found = 0;
 
-    printf("Available Staff:\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "Available Staff:\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
     viewStaff();
 
-    printf("\nEnter Staff ID to edit: ");
+    printf(BLUE "\nEnter Staff ID to edit: " RESET);
     scanf("%d", &staff_id);
 
     for(int i = 0; i < staff_count; i++) {
         if(staff[i].id == staff_id) {
             found = 1;
 
-            printf("\n========================================\n");
-            printf("     EDITING STAFF ID: %d            \n", staff_id);
-            printf("========================================\n");
+            printf(CYAN "\n========================================\n");
+            printf(BOLD "     EDITING STAFF ID: %d            \n", staff_id);
+            printf("========================================\n" RESET);
 
-            printf("Current Name (%s): ", staff[i].name);
+            printf("Current Name (" YELLOW "%s" RESET "): ", staff[i].name);
             getchar();
             char temp[50];
             fgets(temp, 50, stdin);
@@ -1305,42 +1338,42 @@ void editStaff() {
                 strcpy(staff[i].name, temp);
             }
 
-            printf("Current Role (%s): ", staff[i].role);
+            printf("Current Role (" YELLOW "%s" RESET "): ", staff[i].role);
             fgets(temp, 30, stdin);
             if(strlen(temp) > 1) {
                 temp[strcspn(temp, "\n")] = 0;
                 strcpy(staff[i].role, temp);
             }
 
-            printf("Current Department (%s): ", staff[i].department);
+            printf("Current Department (" YELLOW "%s" RESET "): ", staff[i].department);
             fgets(temp, 50, stdin);
             if(strlen(temp) > 1) {
                 temp[strcspn(temp, "\n")] = 0;
                 strcpy(staff[i].department, temp);
             }
 
-            printf("Current Contact (%s): ", staff[i].contact);
+            printf("Current Contact (" YELLOW "%s" RESET "): ", staff[i].contact);
             fgets(temp, 15, stdin);
             if(strlen(temp) > 1) {
                 temp[strcspn(temp, "\n")] = 0;
                 strcpy(staff[i].contact, temp);
             }
 
-            printf("Current Email (%s): ", staff[i].email);
+            printf("Current Email (" YELLOW "%s" RESET "): ", staff[i].email);
             fgets(temp, 50, stdin);
             if(strlen(temp) > 1) {
                 temp[strcspn(temp, "\n")] = 0;
                 strcpy(staff[i].email, temp);
             }
 
-            printf("Current Salary (%.2f): ", staff[i].salary);
+            printf("Current Salary (" YELLOW "%.2f" RESET "): ", staff[i].salary);
             char salary_input[20];
             fgets(salary_input, 20, stdin);
             if(strlen(salary_input) > 1) {
                 staff[i].salary = atof(salary_input);
             }
 
-            printf("Current Shift (%s): ", staff[i].shift);
+            printf("Current Shift (" YELLOW "%s" RESET "): ", staff[i].shift);
             fgets(temp, 20, stdin);
             if(strlen(temp) > 1) {
                 temp[strcspn(temp, "\n")] = 0;
@@ -1349,26 +1382,26 @@ void editStaff() {
 
             saveStaffData();
 
-            printf("\n========================================\n");
+            printf(GREEN "\n========================================\n");
             printf("   STAFF INFORMATION UPDATED!         \n");
-            printf("========================================\n");
+            printf("========================================\n" RESET);
             break;
         }
     }
 
     if(!found) {
-        printf("\nStaff with ID %d not found!\n", staff_id);
+        printf(RED "\nStaff with ID %d not found!\n" RESET, staff_id);
     }
 }
 
 // Delete staff member
 void deleteStaff() {
-    printf("========================================\n");
-    printf("            DELETE STAFF               \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "            DELETE STAFF               \n");
+    printf("========================================\n\n" RESET);
 
     if(staff_count == 0) {
-        printf("No staff members available to delete!\n");
+        printf(RED "No staff members available to delete!\n" RESET);
         return;
     }
 
@@ -1376,28 +1409,28 @@ void deleteStaff() {
     int found = 0;
     char confirm;
 
-    printf("Available Staff:\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "Available Staff:\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
     viewStaff();
 
-    printf("\nEnter Staff ID to delete: ");
+    printf(BLUE "\nEnter Staff ID to delete: " RESET);
     scanf("%d", &staff_id);
 
     for(int i = 0; i < staff_count; i++) {
         if(staff[i].id == staff_id) {
             found = 1;
 
-            printf("\n========================================\n");
-            printf("           STAFF DETAILS               \n");
-            printf("========================================\n");
-            printf("ID           : %d\n", staff[i].id);
-            printf("Name         : %s\n", staff[i].name);
-            printf("Role         : %s\n", staff[i].role);
-            printf("Department   : %s\n", staff[i].department);
-            printf("Contact      : %s\n", staff[i].contact);
-            printf("========================================\n");
+            printf(CYAN "\n========================================\n");
+            printf(BOLD "           STAFF DETAILS               \n");
+            printf("========================================\n" RESET);
+            printf("ID           : " YELLOW "%d\n" RESET, staff[i].id);
+            printf("Name         : " YELLOW "%s\n" RESET, staff[i].name);
+            printf("Role         : " YELLOW "%s\n" RESET, staff[i].role);
+            printf("Department   : " YELLOW "%s\n" RESET, staff[i].department);
+            printf("Contact      : " YELLOW "%s\n" RESET, staff[i].contact);
+            printf(CYAN "========================================\n" RESET);
 
-            printf("\nAre you sure you want to delete this staff member? (y/n): ");
+            printf(YELLOW "\nAre you sure you want to delete this staff member? (y/n): " RESET);
             scanf(" %c", &confirm);
 
             if(confirm == 'y' || confirm == 'Y') {
@@ -1409,60 +1442,60 @@ void deleteStaff() {
 
                 saveStaffData();
 
-                printf("\n========================================\n");
+                printf(GREEN "\n========================================\n");
                 printf("     STAFF DELETED SUCCESSFULLY!       \n");
-                printf("========================================\n");
-                printf("Total staff members now: %d\n", staff_count);
+                printf("========================================\n" RESET);
+                printf("Total staff members now: " YELLOW "%d\n" RESET, staff_count);
             } else {
-                printf("\nOperation cancelled.\n");
+                printf(YELLOW "\nOperation cancelled.\n" RESET);
             }
             break;
         }
     }
 
     if(!found) {
-        printf("\nStaff with ID %d not found!\n", staff_id);
+        printf(RED "\nStaff with ID %d not found!\n" RESET, staff_id);
     }
 }
 
 // Assign duty roster
 void assignDutyRoster() {
-    printf("========================================\n");
-    printf("           ASSIGN DUTY ROSTER          \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "           ASSIGN DUTY ROSTER          \n");
+    printf("========================================\n\n" RESET);
 
     if(staff_count == 0) {
-        printf("No staff members available!\n");
+        printf(RED "No staff members available!\n" RESET);
         return;
     }
 
     int staff_id;
     int found = 0;
 
-    printf("Available Staff:\n");
-    printf("--------------------------------------------------------------------------------\n");
+    printf(YELLOW "Available Staff:\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
     viewStaff();
 
-    printf("\nEnter Staff ID to assign duty: ");
+    printf(BLUE "\nEnter Staff ID to assign duty: " RESET);
     scanf("%d", &staff_id);
 
     for(int i = 0; i < staff_count; i++) {
         if(staff[i].id == staff_id) {
             found = 1;
 
-            printf("\n========================================\n");
-            printf("   ASSIGNING DUTY FOR: %s            \n", staff[i].name);
-            printf("========================================\n");
-            printf("Current Shift: %s\n", staff[i].shift);
+            printf(CYAN "\n========================================\n");
+            printf(BOLD "   ASSIGNING DUTY FOR: %s            \n", staff[i].name);
+            printf("========================================\n" RESET);
+            printf("Current Shift: " YELLOW "%s\n" RESET, staff[i].shift);
 
-            printf("\nAvailable Shifts:\n");
+            printf(YELLOW "\nAvailable Shifts:\n");
             printf("1. Morning (7:00 AM - 3:00 PM)\n");
             printf("2. Evening (3:00 PM - 11:00 PM)\n");
             printf("3. Night (11:00 PM - 7:00 AM)\n");
-            printf("4. Custom Shift\n");
+            printf("4. Custom Shift\n" RESET);
 
             int choice;
-            printf("\nEnter shift choice (1-4): ");
+            printf(BLUE "\nEnter shift choice (1-4): " RESET);
             scanf("%d", &choice);
 
             getchar(); // Clear buffer
@@ -1478,118 +1511,120 @@ void assignDutyRoster() {
                     strcpy(staff[i].shift, "Night (11PM-7AM)");
                     break;
                 case 4:
-                    printf("Enter custom shift details: ");
+                    printf(BLUE "Enter custom shift details: " RESET);
                     fgets(staff[i].shift, 20, stdin);
                     staff[i].shift[strcspn(staff[i].shift, "\n")] = 0;
                     break;
                 default:
-                    printf("Invalid choice! Keeping current shift.\n");
+                    printf(RED "Invalid choice! Keeping current shift.\n" RESET);
             }
 
             saveStaffData();
 
-            printf("\n========================================\n");
+            printf(GREEN "\n========================================\n");
             printf("     DUTY ROSTER UPDATED!             \n");
-            printf("========================================\n");
-            printf("Staff Name: %s\n", staff[i].name);
-            printf("New Shift : %s\n", staff[i].shift);
+            printf("========================================\n" RESET);
+            printf("Staff Name: " YELLOW "%s\n" RESET, staff[i].name);
+            printf("New Shift : " YELLOW "%s\n" RESET, staff[i].shift);
             break;
         }
     }
 
     if(!found) {
-        printf("\nStaff with ID %d not found!\n", staff_id);
+        printf(RED "\nStaff with ID %d not found!\n" RESET, staff_id);
     }
 }
 
 // Search staff
 void searchStaff() {
-    printf("========================================\n");
-    printf("            SEARCH STAFF               \n");
-    printf("========================================\n\n");
+    printf(CYAN "========================================\n");
+    printf(BOLD "            SEARCH STAFF               \n");
+    printf("========================================\n\n" RESET);
 
     if(staff_count == 0) {
-        printf("No staff members found!\n");
+        printf(RED "No staff members found!\n" RESET);
         return;
     }
 
     int choice;
-    printf("1. Search by ID\n");
+    printf(YELLOW "1. Search by ID\n");
     printf("2. Search by Name\n");
     printf("3. Search by Role\n");
     printf("4. Search by Department\n");
-    printf("Enter choice: ");
+    printf(BLUE "Enter choice: " RESET);
     scanf("%d", &choice);
 
     getchar(); // Clear buffer
 
     if(choice == 1) {
         int id;
-        printf("Enter staff ID: ");
+        printf(BLUE "Enter staff ID: " RESET);
         scanf("%d", &id);
 
         for(int i = 0; i < staff_count; i++) {
             if(staff[i].id == id) {
-                printf("\n========================================\n");
+                printf(GREEN "\n========================================\n");
                 printf("           STAFF FOUND                 \n");
-                printf("========================================\n");
-                printf("ID           : %d\n", staff[i].id);
-                printf("Name         : %s\n", staff[i].name);
-                printf("Role         : %s\n", staff[i].role);
-                printf("Department   : %s\n", staff[i].department);
-                printf("Contact      : %s\n", staff[i].contact);
-                printf("Email        : %s\n", staff[i].email);
-                printf("Address      : %s\n", staff[i].address);
-                printf("Qualification: %s\n", staff[i].qualification);
-                printf("Salary       : $%.2f\n", staff[i].salary);
-                printf("Join Date    : %s\n", staff[i].join_date);
-                printf("Shift        : %s\n", staff[i].shift);
-                printf("Status       : %s\n", staff[i].status);
-                printf("========================================\n");
+                printf("========================================\n" RESET);
+                printf("ID           : " YELLOW "%d\n" RESET, staff[i].id);
+                printf("Name         : " YELLOW "%s\n" RESET, staff[i].name);
+                printf("Role         : " YELLOW "%s\n" RESET, staff[i].role);
+                printf("Department   : " YELLOW "%s\n" RESET, staff[i].department);
+                printf("Contact      : " YELLOW "%s\n" RESET, staff[i].contact);
+                printf("Email        : " YELLOW "%s\n" RESET, staff[i].email);
+                printf("Address      : " YELLOW "%s\n" RESET, staff[i].address);
+                printf("Qualification: " YELLOW "%s\n" RESET, staff[i].qualification);
+                printf("Salary       : " YELLOW "$%.2f\n" RESET, staff[i].salary);
+                printf("Join Date    : " YELLOW "%s\n" RESET, staff[i].join_date);
+                printf("Shift        : " YELLOW "%s\n" RESET, staff[i].shift);
+                printf("Status       : " YELLOW "%s\n" RESET, staff[i].status);
+                printf(CYAN "========================================\n" RESET);
                 return;
             }
         }
-        printf("\nStaff not found!\n");
+        printf(RED "\nStaff not found!\n" RESET);
     }
     else if(choice == 2 || choice == 3 || choice == 4) {
         char search_term[50];
 
         if(choice == 2) {
-            printf("Enter staff name: ");
+            printf(BLUE "Enter staff name: " RESET);
             fgets(search_term, 50, stdin);
         }
         else if(choice == 3) {
-            printf("Enter role: ");
+            printf(BLUE "Enter role: " RESET);
             fgets(search_term, 50, stdin);
         }
         else {
-            printf("Enter department: ");
+            printf(BLUE "Enter department: " RESET);
             fgets(search_term, 50, stdin);
         }
 
         search_term[strcspn(search_term, "\n")] = 0;
 
         int found = 0;
-        printf("\nSearch Results:\n");
+        printf(YELLOW "\nSearch Results:\n");
         printf("ID\tName\t\t\tRole\t\tDepartment\t\tContact\n");
-        printf("--------------------------------------------------------------------------------\n");
+        printf("--------------------------------------------------------------------------------\n" RESET);
 
         for(int i = 0; i < staff_count; i++) {
             if((choice == 2 && strstr(staff[i].name, search_term)) ||
                (choice == 3 && strstr(staff[i].role, search_term)) ||
                (choice == 4 && strstr(staff[i].department, search_term))) {
-                printf("%d\t%-20s\t%-15s\t%-20s\t%s\n",
-                       staff[i].id, staff[i].name, staff[i].role,
-                       staff[i].department, staff[i].contact);
+                printf(GREEN "%d\t" RESET, staff[i].id);
+                printf(CYAN "%-20s\t" RESET, staff[i].name);
+                printf(MAGENTA "%-15s\t" RESET, staff[i].role);
+                printf(BLUE "%-20s\t" RESET, staff[i].department);
+                printf(YELLOW "%s\n" RESET, staff[i].contact);
                 found = 1;
             }
         }
 
         if(!found) {
-            printf("No staff members found!\n");
+            printf(RED "No staff members found!\n" RESET);
         }
     }
     else {
-        printf("Invalid choice!\n");
+        printf(RED "Invalid choice!\n" RESET);
     }
 }
