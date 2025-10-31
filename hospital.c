@@ -132,6 +132,7 @@ void loadStaffData();
 void doctorManagementMenu();
 void editDoctor();
 void viewDoctorStatistics();
+void viewDoctorDetails(int doctor_id);
 
 // Utility function to clear screen
 
@@ -307,7 +308,8 @@ void doctorManagementMenu() {
         printf("  4. Search Doctor                     \n");
         printf(YELLOW "  5. Edit Doctor Information           \n");
         printf("  6. View Doctor Statistics            \n" RESET);
-        printf(RED "  7. Back to Admin Menu                \n" RESET);
+        printf("  7. View Doctor Details               \n" RESET);
+        printf(RED "  8. Back to Admin Menu                \n" RESET);
         printf(CYAN "========================================\n" RESET);
         printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
@@ -340,13 +342,22 @@ void doctorManagementMenu() {
                 pauseScreen();
                 break;
             case 7:
+                {
+                    int doctor_id;
+                    printf("Enter Doctor ID: ");
+                    scanf("%d", &doctor_id);
+                    viewDoctorDetails(doctor_id);
+                    pauseScreen();
+                }
+                break;
+            case 8:
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 7);
+    } while(choice != 8);
 }
 
 // Staff Management Menu
@@ -1882,3 +1893,51 @@ void viewDoctorStatistics() {
     printf(CYAN "========================================\n" RESET);
 }
 
+// View Detailed Doctor Information
+
+void viewDoctorDetails(int doctor_id) {
+    int found = 0;
+
+    for(int i = 0; i < doctor_count; i++) {
+        if(doctors[i].id == doctor_id) {
+            found = 1;
+
+            printf(CYAN "========================================\n");
+            printf(BOLD "        DETAILED DOCTOR INFORMATION    \n");
+            printf("========================================\n" RESET);
+            printf("Doctor ID      : " YELLOW "%d\n" RESET, doctors[i].id);
+            printf("Name           : " YELLOW "%s\n" RESET, doctors[i].name);
+            printf("Specialization : " YELLOW "%s\n" RESET, doctors[i].specialization);
+            printf("Contact        : " YELLOW "%s\n" RESET, doctors[i].contact);
+            printf("Availability   : " YELLOW "%s\n" RESET, doctors[i].availability);
+            printf(CYAN "========================================\n" RESET);
+
+            // Show appointments for this doctor
+            printf(YELLOW "\nAppointments:\n" RESET);
+            printf("--------------------------------------------------------------------------------\n");
+
+            int has_appointments = 0;
+            for(int j = 0; j < appointment_count; j++) {
+                if(appointments[j].doctor_id == doctor_id) {
+                    has_appointments = 1;
+                    printf("Appointment ID: " GREEN "%d\n" RESET, appointments[j].id);
+                    printf("Patient ID    : %d\n", appointments[j].patient_id);
+                    printf("Date          : %s\n", appointments[j].date);
+                    printf("Time          : %s\n", appointments[j].time);
+                    printf("Status        : %s\n", appointments[j].status);
+                    printf("--------------------------------------------------------------------------------\n");
+                }
+            }
+
+            if(!has_appointments) {
+                printf(RED "No appointments scheduled for this doctor.\n" RESET);
+            }
+
+            break;
+        }
+    }
+
+    if(!found) {
+        printf(RED "Doctor with ID %d not found!\n" RESET, doctor_id);
+    }
+}
