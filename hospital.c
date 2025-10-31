@@ -129,8 +129,10 @@ void searchStaff();
 int getNewStaffId();
 void saveStaffData();
 void loadStaffData();
+void doctorManagementMenu();
 
 // Utility function to clear screen
+
 void clearScreen() {
     system(CLEAR_SCREEN);
 }
@@ -977,6 +979,7 @@ int adminLogin() {
 }
 
 // Admin Menu
+
 void adminMenu() {
     int choice;
 
@@ -985,12 +988,49 @@ void adminMenu() {
         printf(CYAN "========================================\n");
         printf(BOLD "             ADMIN PANEL                \n");
         printf("========================================\n" RESET);
+        printf(GREEN "  1. Doctor Management                 \n" RESET);
+        printf(YELLOW "  2. Staff Management                  \n" RESET);
+        printf(RED "  3. Logout                            \n" RESET);
+        printf(CYAN "========================================\n" RESET);
+        printf(BLUE "Enter your choice: " RESET);
+        scanf("%d", &choice);
+
+        clearScreen();
+
+        switch(choice) {
+            case 1:
+                doctorManagementMenu();
+                break;
+            case 2:
+                staffManagementMenu();
+                break;
+            case 3:
+                printf(GREEN "========================================\n");
+                printf("    Logged out successfully!           \n");
+                printf("========================================\n" RESET);
+                break;
+            default:
+                printf(RED "Invalid choice! Please try again.\n" RESET);
+                pauseScreen();
+        }
+    } while(choice != 3);
+}
+
+// Doctor Management Menu
+
+void doctorManagementMenu() {
+    int choice;
+
+    do {
+        clearScreen();
+        printf(CYAN "========================================\n");
+        printf(BOLD "         DOCTOR MANAGEMENT             \n");
+        printf("========================================\n" RESET);
         printf(GREEN "  1. Add New Doctor                    \n");
         printf("  2. Remove Doctor                     \n");
         printf("  3. View All Doctors                  \n");
         printf("  4. Search Doctor                     \n");
-        printf(YELLOW "  5. Staff Management                  \n" RESET);
-        printf(RED "  6. Logout                            \n" RESET);
+        printf(RED "  5. Back to Admin Menu                \n" RESET);
         printf(CYAN "========================================\n" RESET);
         printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
@@ -1015,20 +1055,16 @@ void adminMenu() {
                 pauseScreen();
                 break;
             case 5:
-                staffManagementMenu();
-                pauseScreen();
-                break;
-            case 6:
-                printf(GREEN "========================================\n");
-                printf("    Logged out successfully!           \n");
-                printf("========================================\n" RESET);
+                printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 6);
+    } while(choice != 5);
 }
+
+// Staff Management Menu
 
 void staffManagementMenu() {
     int choice;
