@@ -446,7 +446,7 @@ void addPatient() {
 
     saveData();
 
-    printf(GREEN "\n========================================\n");
+    printf( "\n========================================\n");
     printf("   PATIENT ADDED SUCCESSFULLY!         \n");
     printf("========================================\n" RESET);
     printf("Patient ID: " YELLOW "%d\n" RESET, p.id);
