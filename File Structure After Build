@@ -1,0 +1,11 @@
+hospital_management/    # Project directory
+├── hospital_management.c   # Source code
+├── Makefile               # This makefile
+├── hospital_management    # Compiled executable (after build)
+├── patients.dat          # Patient data (generated)
+├── doctors.dat           # Doctor data (generated)
+├── appointments.dat      # Appointment data (generated)
+├── bills.dat             # Billing data (generated)
+├── staff.dat             # Staff data (generated)
+├── Bill_*.txt           # Generated bill files
+└── backups/              # Backup directory (created with make backup)
