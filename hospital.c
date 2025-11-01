@@ -135,7 +135,6 @@ void viewDoctorStatistics();
 void viewDoctorDetails(int doctor_id);
 
 // Utility function to clear screen
-
 void clearScreen() {
     system(CLEAR_SCREEN);
 }
@@ -155,7 +154,6 @@ void pauseScreen() {
     }
 }
 
-
 int main() {
     loadData();
     int choice;
@@ -164,7 +162,7 @@ int main() {
     printf(CYAN "========================================\n");
     printf(BOLD "   HOSPITAL MANAGEMENT SYSTEM          \n");
     printf("========================================\n" RESET);
-    printf(GREEN "\nPress Enter to continue..." RESET);
+    printf("\nPress Enter to continue...");
     getchar();
 
     do {
@@ -253,9 +251,7 @@ void displayMenu() {
     printf(CYAN "========================================\n" RESET);
 }
 
-
 // Admin Menu
-
 void adminMenu() {
     int choice;
 
@@ -293,7 +289,6 @@ void adminMenu() {
 }
 
 // Doctor Management Menu
-
 void doctorManagementMenu() {
     int choice;
 
@@ -360,8 +355,7 @@ void doctorManagementMenu() {
     } while(choice != 8);
 }
 
-// Staff Management Menu
-
+// Staff Management Menu]
 void staffManagementMenu() {
     int choice;
     do {
@@ -412,7 +406,6 @@ void staffManagementMenu() {
 }
 
 // Patient Management Functions
-
 void addPatient() {
     if(patient_count >= 1000) {
         printf(RED "Patient database full!\n" RESET);
@@ -952,6 +945,7 @@ int getNewBillNo() {
     }
     return max_bill + 1;
 }
+
 int getNewStaffId() {
     int max_id = 2000;
     for(int i = 0; i < staff_count; i++) {
@@ -985,7 +979,6 @@ void loadStaffData() {
 }
 
 // Save all data to files
-
 void saveData() {
     FILE *fp;
 
@@ -1063,9 +1056,7 @@ void loadData() {
      loadStaffData();
 }
 
-
 //  ADMIN PANEL FUNCTIONS
-
 void getPasswordWithMask(char *password, int max_length) {
     int i = 0;
     char ch;
@@ -1142,7 +1133,6 @@ int adminLogin() {
 }
 
 // Remove Doctor Function
-
 void removeDoctor() {
     printf(CYAN "========================================\n");
     printf(BOLD "            REMOVE DOCTOR               \n");
@@ -1702,7 +1692,6 @@ void searchStaff() {
 }
 
 // Edit Doctor Information
-
 void editDoctor() {
     printf(CYAN "========================================\n");
     printf(BOLD "       EDIT DOCTOR INFORMATION         \n");
@@ -1716,7 +1705,7 @@ void editDoctor() {
     int doctor_id;
     int found = 0;
 
-    printf(YELLOW "Available Doctors:\n");
+    printf(CYAN "Available Doctors:\n");
     printf("--------------------------------------------------------------------------------\n" RESET);
     viewDoctors();
 
@@ -1788,7 +1777,6 @@ void editDoctor() {
 }
 
 // View Doctor Statistics
-
 void viewDoctorStatistics() {
     printf(CYAN "========================================\n");
     printf(BOLD "        DOCTOR STATISTICS              \n");
@@ -1894,7 +1882,6 @@ void viewDoctorStatistics() {
 }
 
 // View Detailed Doctor Information
-
 void viewDoctorDetails(int doctor_id) {
     int found = 0;
 
