@@ -455,15 +455,19 @@ void reportsAndAnalyticsMenu() {
                 dailyRevenueReport();
                 pauseScreen();
                 break;
-
+                break;
             case 2:
+                monthlyRevenueReport();
+                pauseScreen();
+                break;
+            case 3:
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 2);
+    } while(choice != 3);
 }
 
 // Patient Management Functions
@@ -2034,6 +2038,77 @@ void dailyRevenueReport() {
 
     if(daily_bills > 0) {
         printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, daily_total / daily_bills);
+    }
+
+    printf(CYAN "========================================\n" RESET);
+}
+
+// Monthly income
+void monthlyRevenueReport() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "        MONTHLY REVENUE REPORT         \n");
+    printf("========================================\n\n" RESET);
+
+    if(bill_count == 0) {
+        printf(RED "No bills found!\n" RESET);
+        return;
+    }
+
+    int month, year;
+    printf(BLUE "Enter month (1-12): " RESET);
+    scanf("%d", &month);
+    printf(BLUE "Enter year: " RESET);
+    scanf("%d", &year);
+
+    float monthly_total = 0;
+    int monthly_bills = 0;
+    int days[32] = {0}; // Revenue per day
+
+    printf(YELLOW "\nMonthly Revenue Report for %d/%d:\n", month, year);
+    printf("================================================================================\n" RESET);
+    printf(YELLOW "Date\t\tBill Count\tDaily Revenue\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
+
+    // Initialize days array
+    for(int i = 1; i <= 31; i++) {
+        days[i] = 0;
+    }
+
+    for(int i = 0; i < bill_count; i++) {
+        int bill_month, bill_year, bill_day;
+        sscanf(bills[i].date, "%d/%d/%d", &bill_day, &bill_month, &bill_year);
+
+        if(bill_month == month && bill_year == year) {
+            monthly_total += bills[i].total_amount;
+            monthly_bills++;
+            days[bill_day] += bills[i].total_amount;
+        }
+    }
+
+    // Display daily breakdown
+    for(int day = 1; day <= 31; day++) {
+        if(days[day] > 0) {
+            int day_bill_count = 0;
+            for(int i = 0; i < bill_count; i++) {
+                int bill_month, bill_year, bill_day;
+                sscanf(bills[i].date, "%d/%d/%d", &bill_day, &bill_month, &bill_year);
+                if(bill_month == month && bill_year == year && bill_day == day) {
+                    day_bill_count++;
+                }
+            }
+            printf("%02d/%02d/%d\t" YELLOW "%d\t\t" GREEN "$%.2f\n" RESET,
+                   day, month, year, day_bill_count, days[day]);
+        }
+    }
+
+    printf(CYAN "================================================================================\n" RESET);
+    printf(YELLOW "\nMonthly Summary:\n" RESET);
+    printf("Total Bills Generated: " GREEN "%d\n" RESET, monthly_bills);
+    printf("Total Revenue        : " GREEN "$%.2f\n" RESET, monthly_total);
+
+    if(monthly_bills > 0) {
+        printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, monthly_total / monthly_bills);
+        printf("Average Daily Revenue: " GREEN "$%.2f\n" RESET, monthly_total / 30.0);
     }
 
     printf(CYAN "========================================\n" RESET);
