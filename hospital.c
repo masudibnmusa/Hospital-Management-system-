@@ -460,14 +460,18 @@ void reportsAndAnalyticsMenu() {
                 monthlyRevenueReport();
                 pauseScreen();
                 break;
-            case 3:
+             case 3:
+                yearlyRevenueReport();
+                pauseScreen();
+                break;
+            case 4:
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 3);
+    } while(choice != 4);
 }
 
 // Patient Management Functions
@@ -2109,6 +2113,90 @@ void monthlyRevenueReport() {
     if(monthly_bills > 0) {
         printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, monthly_total / monthly_bills);
         printf("Average Daily Revenue: " GREEN "$%.2f\n" RESET, monthly_total / 30.0);
+    }
+
+    printf(CYAN "========================================\n" RESET);
+}
+
+// Yearly statistics
+void yearlyRevenueReport() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "         YEARLY REVENUE REPORT         \n");
+    printf("========================================\n\n" RESET);
+
+    if(bill_count == 0) {
+        printf(RED "No bills found!\n" RESET);
+        return;
+    }
+
+    int year;
+    printf(BLUE "Enter year: " RESET);
+    scanf("%d", &year);
+
+    float yearly_total = 0;
+    int yearly_bills = 0;
+    float monthly_totals[13] = {0}; // Index 1-12 for months
+    int monthly_bills[13] = {0};
+
+    printf(YELLOW "\nYearly Revenue Report for %d:\n", year);
+    printf("================================================================================\n" RESET);
+    printf(YELLOW "Month\t\tBill Count\tMonthly Revenue\t\tAverage Bill\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
+
+    for(int i = 0; i < bill_count; i++) {
+        int bill_month, bill_year, bill_day;
+        sscanf(bills[i].date, "%d/%d/%d", &bill_day, &bill_month, &bill_year);
+
+        if(bill_year == year) {
+            yearly_total += bills[i].total_amount;
+            yearly_bills++;
+            monthly_totals[bill_month] += bills[i].total_amount;
+            monthly_bills[bill_month]++;
+        }
+    }
+
+    // Display monthly breakdown
+    char* months[] = {"", "January", "February", "March", "April", "May", "June",
+                     "July", "August", "September", "October", "November", "December"};
+
+    for(int month = 1; month <= 12; month++) {
+        if(monthly_bills[month] > 0) {
+            float avg_bill = monthly_totals[month] / monthly_bills[month];
+            printf("%-10s\t" YELLOW "%d\t\t" GREEN "$%-10.2f\t$%-10.2f\n" RESET,
+                   months[month], monthly_bills[month], monthly_totals[month], avg_bill);
+        }
+    }
+
+    printf(CYAN "================================================================================\n" RESET);
+    printf(YELLOW "\nYearly Summary:\n" RESET);
+    printf("Total Bills Generated: " GREEN "%d\n" RESET, yearly_bills);
+    printf("Total Revenue        : " GREEN "$%.2f\n" RESET, yearly_total);
+
+    if(yearly_bills > 0) {
+        printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, yearly_total / yearly_bills);
+        printf("Average Monthly Revenue: " GREEN "$%.2f\n" RESET, yearly_total / 12.0);
+    }
+
+    // Find best and worst months
+    float max_revenue = 0, min_revenue = yearly_total;
+    int best_month = 0, worst_month = 0;
+
+    for(int month = 1; month <= 12; month++) {
+        if(monthly_totals[month] > max_revenue) {
+            max_revenue = monthly_totals[month];
+            best_month = month;
+        }
+        if(monthly_totals[month] > 0 && monthly_totals[month] < min_revenue) {
+            min_revenue = monthly_totals[month];
+            worst_month = month;
+        }
+    }
+
+    if(best_month > 0) {
+        printf("Best Month          : " GREEN "%s ($%.2f)\n" RESET, months[best_month], max_revenue);
+    }
+    if(worst_month > 0) {
+        printf("Worst Month         : " RED "%s ($%.2f)\n" RESET, months[worst_month], min_revenue);
     }
 
     printf(CYAN "========================================\n" RESET);
