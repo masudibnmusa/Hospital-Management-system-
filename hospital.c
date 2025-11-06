@@ -465,13 +465,18 @@ void reportsAndAnalyticsMenu() {
                 pauseScreen();
                 break;
             case 4:
+                unpaidBillsReport();
+                pauseScreen();
+                break;
+            case 5:
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
+
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 4);
+    } while(choice != 5);
 }
 
 // Patient Management Functions
@@ -2197,6 +2202,62 @@ void yearlyRevenueReport() {
     }
     if(worst_month > 0) {
         printf("Worst Month         : " RED "%s ($%.2f)\n" RESET, months[worst_month], min_revenue);
+    }
+
+    printf(CYAN "========================================\n" RESET);
+}
+
+// Outstanding payments
+void unpaidBillsReport() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "         UNPAID BILLS REPORT           \n");
+    printf("========================================\n\n" RESET);
+
+    if(bill_count == 0) {
+        printf(RED "No bills found!\n" RESET);
+        return;
+    }
+
+    float total_outstanding = 0;
+    int unpaid_count = 0;
+
+    printf(YELLOW "Outstanding Bills:\n");
+    printf("================================================================================\n" RESET);
+    printf(YELLOW "Bill No\tPatient ID\tTotal Amount\tDate\t\tPatient Name\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
+
+    for(int i = 0; i < bill_count; i++) {
+        if(strcmp(bills[i].status, "Generated") == 0 ||
+           strstr(bills[i].status, "Unpaid") != NULL ||
+           strstr(bills[i].status, "Pending") != NULL) {
+
+            // Find patient name
+            char patient_name[50] = "Unknown";
+            for(int j = 0; j < patient_count; j++) {
+                if(patients[j].id == bills[i].patient_id) {
+                    strcpy(patient_name, patients[j].name);
+                    break;
+                }
+            }
+
+            printf(GREEN "%d\t" RESET, bills[i].bill_no);
+            printf("%d\t\t" RESET, bills[i].patient_id);
+            printf(RED "$%.2f\t" RESET, bills[i].total_amount);
+            printf(CYAN "%s\t" RESET, bills[i].date);
+            printf(YELLOW "%s\n" RESET, patient_name);
+
+            total_outstanding += bills[i].total_amount;
+            unpaid_count++;
+        }
+    }
+
+    printf(CYAN "================================================================================\n" RESET);
+    printf(YELLOW "\nOutstanding Payments Summary:\n" RESET);
+    printf("Total Unpaid Bills : " RED "%d\n" RESET, unpaid_count);
+    printf("Total Amount Due   : " RED "$%.2f\n" RESET, total_outstanding);
+
+    if(unpaid_count > 0) {
+        printf("Average Unpaid Bill : " RED "$%.2f\n" RESET, total_outstanding / unpaid_count);
     }
 
     printf(CYAN "========================================\n" RESET);
