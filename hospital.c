@@ -455,12 +455,11 @@ void reportsAndAnalyticsMenu() {
                 dailyRevenueReport();
                 pauseScreen();
                 break;
-                break;
             case 2:
                 monthlyRevenueReport();
                 pauseScreen();
                 break;
-             case 3:
+            case 3:
                 yearlyRevenueReport();
                 pauseScreen();
                 break;
@@ -469,14 +468,17 @@ void reportsAndAnalyticsMenu() {
                 pauseScreen();
                 break;
             case 5:
+                departmentRevenue();
+                pauseScreen();
+                break;
+            case 6:
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
-
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 5);
+    } while(choice != 6);
 }
 
 // Patient Management Functions
@@ -2258,6 +2260,103 @@ void unpaidBillsReport() {
 
     if(unpaid_count > 0) {
         printf("Average Unpaid Bill : " RED "$%.2f\n" RESET, total_outstanding / unpaid_count);
+    }
+
+    printf(CYAN "========================================\n" RESET);
+}
+
+// Income by department
+void departmentRevenue() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "      DEPARTMENT REVENUE REPORT        \n");
+    printf("========================================\n\n" RESET);
+
+    if(bill_count == 0 || doctor_count == 0) {
+        printf(RED "No bills or doctors found!\n" RESET);
+        return;
+    }
+
+    // Simple department revenue tracking based on doctor specializations
+    char departments[50][50];
+    float dept_revenue[50] = {0};
+    int dept_bills[50] = {0};
+    int dept_count = 0;
+
+    printf(YELLOW "Revenue by Department/Specialization:\n");
+    printf("================================================================================\n" RESET);
+    printf(YELLOW "Department/Specialization\tBill Count\tTotal Revenue\t\tAverage Revenue\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
+
+    // For each bill, find the doctor and their specialization
+    for(int i = 0; i < bill_count; i++) {
+        // Find which doctor this bill is associated with through appointments
+        int patient_id = bills[i].patient_id;
+        char department[50] = "General";
+
+        // Try to find an appointment for this patient to get doctor info
+        for(int j = 0; j < appointment_count; j++) {
+            if(appointments[j].patient_id == patient_id) {
+                int doctor_id = appointments[j].doctor_id;
+                // Find the doctor's specialization
+                for(int k = 0; k < doctor_count; k++) {
+                    if(doctors[k].id == doctor_id) {
+                        strcpy(department, doctors[k].specialization);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        // Add to department revenue
+        int found = 0;
+        for(int d = 0; d < dept_count; d++) {
+            if(strcmp(departments[d], department) == 0) {
+                dept_revenue[d] += bills[i].total_amount;
+                dept_bills[d]++;
+                found = 1;
+                break;
+            }
+        }
+
+        if(!found && dept_count < 50) {
+            strcpy(departments[dept_count], department);
+            dept_revenue[dept_count] = bills[i].total_amount;
+            dept_bills[dept_count] = 1;
+            dept_count++;
+        }
+    }
+
+    // Display department revenue
+    float grand_total = 0;
+    int total_bills = 0;
+
+    for(int i = 0; i < dept_count; i++) {
+        float avg_revenue = dept_revenue[i] / dept_bills[i];
+        printf("%-25s\t" YELLOW "%d\t\t" GREEN "$%-10.2f\t$%-10.2f\n" RESET,
+               departments[i], dept_bills[i], dept_revenue[i], avg_revenue);
+
+        grand_total += dept_revenue[i];
+        total_bills += dept_bills[i];
+    }
+
+    printf(CYAN "================================================================================\n" RESET);
+    printf(YELLOW "\nDepartment Revenue Summary:\n" RESET);
+    printf("Total Departments   : " GREEN "%d\n" RESET, dept_count);
+    printf("Total Bills         : " GREEN "%d\n" RESET, total_bills);
+    printf("Grand Total Revenue : " GREEN "$%.2f\n" RESET, grand_total);
+
+    if(dept_count > 0) {
+        // Find top performing department
+        float max_revenue = 0;
+        int top_dept = 0;
+        for(int i = 0; i < dept_count; i++) {
+            if(dept_revenue[i] > max_revenue) {
+                max_revenue = dept_revenue[i];
+                top_dept = i;
+            }
+        }
+        printf("Top Department      : " GREEN "%s ($%.2f)\n" RESET, departments[top_dept], max_revenue);
     }
 
     printf(CYAN "========================================\n" RESET);
