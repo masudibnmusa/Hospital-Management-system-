@@ -133,6 +133,12 @@ void doctorManagementMenu();
 void editDoctor();
 void viewDoctorStatistics();
 void viewDoctorDetails(int doctor_id);
+void reportsAndAnalyticsMenu();
+void dailyRevenueReport();
+void monthlyRevenueReport();
+void yearlyRevenueReport();
+void unpaidBillsReport();
+void departmentRevenue();
 
 // Utility function to safely clear input buffer
 void clearInputBuffer() {
@@ -276,7 +282,8 @@ void adminMenu() {
         printf("========================================\n" RESET);
         printf(GREEN "  1. Doctor Management                 \n" RESET);
         printf(YELLOW "  2. Staff Management                  \n" RESET);
-        printf(RED "  3. Logout                            \n" RESET);
+        printf(MAGENTA "  3. Reports & Analytics               \n" RESET);
+        printf(RED "  4. Logout                            \n" RESET);
         printf(CYAN "========================================\n" RESET);
         printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
@@ -291,6 +298,9 @@ void adminMenu() {
                 staffManagementMenu();
                 break;
             case 3:
+                reportsAndAnalyticsMenu();
+                break;
+            case 4:
                 printf(GREEN "========================================\n");
                 printf("    Logged out successfully!           \n");
                 printf("========================================\n" RESET);
@@ -299,7 +309,7 @@ void adminMenu() {
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 3);
+    } while(choice != 4);
 }
 
 // Doctor Management Menu
@@ -417,6 +427,43 @@ void staffManagementMenu() {
         }
         if(choice != 7) pauseScreen();
     } while(choice != 7);
+}
+
+// Reports & Analytics Menu
+void reportsAndAnalyticsMenu() {
+    int choice;
+
+    do {
+        clearScreen();
+        printf(CYAN "========================================\n");
+        printf(BOLD "         REPORTS & ANALYTICS           \n");
+        printf("========================================\n" RESET);
+        printf(GREEN "  1. Daily Revenue Report              \n");
+        printf("  2. Monthly Revenue Report            \n");
+        printf("  3. Yearly Revenue Report             \n");
+        printf(YELLOW "  4. Unpaid Bills Report               \n");
+        printf("  5. Department Revenue Report         \n" RESET);
+        printf(RED "  6. Back to Admin Menu                \n" RESET);
+        printf(CYAN "========================================\n" RESET);
+        printf(BLUE "Enter your choice: " RESET);
+        scanf("%d", &choice);
+
+        clearScreen();
+
+        switch(choice) {
+            case 1:
+                dailyRevenueReport();
+                pauseScreen();
+                break;
+
+            case 2:
+                printf(GREEN "Returning to Admin Menu...\n" RESET);
+                break;
+            default:
+                printf(RED "Invalid choice! Please try again.\n" RESET);
+                pauseScreen();
+        }
+    } while(choice != 2);
 }
 
 // Patient Management Functions
@@ -1941,4 +1988,53 @@ void viewDoctorDetails(int doctor_id) {
     if(!found) {
         printf(RED "Doctor with ID %d not found!\n" RESET, doctor_id);
     }
+}
+
+// Today's earnings
+void dailyRevenueReport() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "         DAILY REVENUE REPORT          \n");
+    printf("========================================\n\n" RESET);
+
+    if(bill_count == 0) {
+        printf(RED "No bills found!\n" RESET);
+        return;
+    }
+
+    // Get today's date
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    char today[20];
+    sprintf(today, "%02d/%02d/%04d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+
+    float daily_total = 0;
+    int daily_bills = 0;
+
+    printf(YELLOW "Bills for Today (%s):\n", today);
+    printf("================================================================================\n" RESET);
+    printf(YELLOW "Bill No\tPatient ID\tTotal Amount\tStatus\n");
+    printf("--------------------------------------------------------------------------------\n" RESET);
+
+    for(int i = 0; i < bill_count; i++) {
+        if(strcmp(bills[i].date, today) == 0) {
+            printf(GREEN "%d\t" RESET, bills[i].bill_no);
+            printf("%d\t\t" RESET, bills[i].patient_id);
+            printf(YELLOW "$%.2f\t\t" RESET, bills[i].total_amount);
+            printf(BLUE "%s\n" RESET, bills[i].status);
+
+            daily_total += bills[i].total_amount;
+            daily_bills++;
+        }
+    }
+
+    printf(CYAN "================================================================================\n" RESET);
+    printf(YELLOW "\nDaily Summary:\n" RESET);
+    printf("Total Bills Generated: " GREEN "%d\n" RESET, daily_bills);
+    printf("Total Revenue        : " GREEN "$%.2f\n" RESET, daily_total);
+
+    if(daily_bills > 0) {
+        printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, daily_total / daily_bills);
+    }
+
+    printf(CYAN "========================================\n" RESET);
 }
