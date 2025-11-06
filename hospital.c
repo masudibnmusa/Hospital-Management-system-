@@ -134,6 +134,19 @@ void editDoctor();
 void viewDoctorStatistics();
 void viewDoctorDetails(int doctor_id);
 
+// Utility function to safely clear input buffer
+void clearInputBuffer() {
+    int c;
+    // Read and discard characters until newline or EOF
+    while ((c = getchar()) != '\n' && c != EOF) {
+        // Continue clearing
+    }
+    // If we hit EOF, clear the error state
+    if (c == EOF) {
+        clearerr(stdin);
+    }
+}
+
 // Utility function to clear screen
 void clearScreen() {
     system(CLEAR_SCREEN);
@@ -143,14 +156,15 @@ void clearScreen() {
 void pauseScreen() {
     printf("\nPress Enter to continue...");
 
-    // Clear the input buffer first
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    // Clear any pending input first
+    clearInputBuffer();
 
     // Wait for Enter key
-    while (1) {
-        c = getchar();
-        if (c == '\n' || c == EOF) break;
+    int c = getchar();
+
+    // Handle EOF or error conditions
+    if (c == EOF) {
+        clearerr(stdin);
     }
 }
 
@@ -162,7 +176,7 @@ int main() {
     printf(CYAN "========================================\n");
     printf(BOLD "   HOSPITAL MANAGEMENT SYSTEM          \n");
     printf("========================================\n" RESET);
-    printf("\nPress Enter to continue...");
+    printf(GREEN "\nPress Enter to continue..." RESET);
     getchar();
 
     do {
@@ -446,7 +460,7 @@ void addPatient() {
 
     saveData();
 
-    printf( "\n========================================\n");
+    printf(GREEN "\n========================================\n");
     printf("   PATIENT ADDED SUCCESSFULLY!         \n");
     printf("========================================\n" RESET);
     printf("Patient ID: " YELLOW "%d\n" RESET, p.id);
