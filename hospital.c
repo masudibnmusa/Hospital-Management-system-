@@ -90,6 +90,17 @@ typedef struct {
     char status[20];         // Active, Inactive
 } Staff;
 
+typedef struct {
+    int id;
+    char name[100];
+    char category[50];       // Tablet, Syrup, Injection, etc.
+    char manufacturer[100];
+    float price;
+    int quantity;
+    char expiry_date[20];    // DD/MM/YYYY
+    char description[200];
+} Medicine;
+
 // Global arrays to store data
 Patient patients[1000];
 Doctor doctors[100];
@@ -103,6 +114,9 @@ int bill_count = 0;
 
 Staff staff[200];
 int staff_count = 0;
+
+Medicine medicines[500];
+int medicine_count = 0;
 
 // Function prototypes
 void clearScreen();
@@ -154,6 +168,11 @@ void restoreData();
 void deleteAllData();
 void exportToCSV();
 void databaseManagementMenu();
+void medicineManagementMenu();
+void addMedicine();
+int getNewMedicineId();
+void saveMedicineData();
+void loadMedicineData();
 
 // Utility function to safely clear input buffer
 void clearInputBuffer() {
@@ -312,12 +331,16 @@ int main() {
                 pauseScreen();
                 break;
             case 10:
+                medicineManagementMenu();
+                pauseScreen();
+                break;
+            case 11:
                 if(adminLogin()) {
                     adminMenu();
                 }
                 pauseScreen();
                 break;
-            case 11:
+            case 12:
                 saveData();
                 printf(CYAN "========================================\n");
                 printf(GREEN "   Thank you for using Hospital        \n");
@@ -328,7 +351,7 @@ int main() {
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 11);
+    } while(choice != 12);
 
     return 0;
 }
@@ -347,8 +370,9 @@ void displayMenu() {
     printf("7. View Appointments\n");
     printf("8. Generate Bill\n");
     printf("9. View Bills\n");
-    printf(YELLOW "10. Admin panel\n" RESET);
-    printf(RED "11. Exit\n" RESET);
+    printf(MAGENTA "10. Medicine & Equipment\n" RESET);
+    printf(YELLOW "11. Admin panel\n" RESET);
+    printf(RED "12. Exit\n" RESET);
     printf(CYAN "========================================\n" RESET);
 }
 
@@ -1318,6 +1342,8 @@ void loadData() {
     }
     // Load staff data
     loadStaffData();
+    // Load medicine data
+    loadMedicineData();
 }
 
 //  ADMIN PANEL FUNCTIONS
@@ -3004,4 +3030,143 @@ void departmentRevenue() {
     }
     
     printf(CYAN "========================================\n" RESET);
+}
+
+// Medicine Management Functions
+
+// Get new medicine ID
+int getNewMedicineId() {
+    int max_id = 3000;
+    for(int i = 0; i < medicine_count; i++) {
+        if(medicines[i].id > max_id) {
+            max_id = medicines[i].id;
+        }
+    }
+    return max_id + 1;
+}
+
+// Save medicine data to file
+void saveMedicineData() {
+    FILE *fp = fopen("medicines.dat", "wb");
+    if(fp != NULL) {
+        fwrite(&medicine_count, sizeof(int), 1, fp);
+        fwrite(medicines, sizeof(Medicine), medicine_count, fp);
+        fclose(fp);
+    }
+}
+
+// Load medicine data from file
+void loadMedicineData() {
+    FILE *fp = fopen("medicines.dat", "rb");
+    if(fp != NULL) {
+        int cnt = 0;
+        if (fread(&cnt, sizeof(int), 1, fp) == 1) {
+            if (cnt < 0) cnt = 0;
+            if (cnt > 500) cnt = 500; // capacity guard
+            medicine_count = cnt;
+            size_t readn = fread(medicines, sizeof(Medicine), medicine_count, fp);
+            if (readn != (size_t)medicine_count) {
+                medicine_count = (int)readn;
+            }
+        } else {
+            medicine_count = 0;
+        }
+        fclose(fp);
+    }
+}
+
+// Add new medicine
+void addMedicine() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "           ADD NEW MEDICINE            \n");
+    printf("========================================\n\n" RESET);
+
+    if(medicine_count >= 500) {
+        printf(RED "Medicine inventory full! Cannot add more medicines.\n" RESET);
+        return;
+    }
+
+    Medicine m;
+    m.id = getNewMedicineId();
+
+    printf(BLUE "Enter medicine name: " RESET);
+    getchar();
+    fgets(m.name, 100, stdin);
+    m.name[strcspn(m.name, "\n")] = 0;
+
+    printf(BLUE "Enter category (Tablet/Syrup/Injection/Capsule/etc.): " RESET);
+    fgets(m.category, 50, stdin);
+    m.category[strcspn(m.category, "\n")] = 0;
+
+    printf(BLUE "Enter manufacturer name: " RESET);
+    fgets(m.manufacturer, 100, stdin);
+    m.manufacturer[strcspn(m.manufacturer, "\n")] = 0;
+
+    printf(BLUE "Enter price per unit: $" RESET);
+    scanf("%f", &m.price);
+
+    printf(BLUE "Enter quantity in stock: " RESET);
+    scanf("%d", &m.quantity);
+
+    // Read and validate expiry date
+    while (1) {
+        printf(BLUE "Enter expiry date (DD/MM/YYYY): " RESET);
+        scanf("%19s", m.expiry_date);
+        if (validateDate(m.expiry_date)) break;
+        printf(RED "Invalid date. Use DD/MM/YYYY format.\n" RESET);
+    }
+
+    printf(BLUE "Enter description/usage: " RESET);
+    getchar();
+    fgets(m.description, 200, stdin);
+    m.description[strcspn(m.description, "\n")] = 0;
+
+    medicines[medicine_count++] = m;
+    saveMedicineData();
+
+    clearScreen();
+    printf(GREEN "\n========================================\n");
+    printf("     MEDICINE ADDED SUCCESSFULLY!      \n");
+    printf("========================================\n" RESET);
+    printf("Medicine ID    : " YELLOW "%d\n" RESET, m.id);
+    printf("Name           : " YELLOW "%s\n" RESET, m.name);
+    printf("Category       : " YELLOW "%s\n" RESET, m.category);
+    printf("Manufacturer   : " YELLOW "%s\n" RESET, m.manufacturer);
+    printf("Price per Unit : " YELLOW "$%.2f\n" RESET, m.price);
+    printf("Quantity       : " YELLOW "%d units\n" RESET, m.quantity);
+    printf("Expiry Date    : " YELLOW "%s\n" RESET, m.expiry_date);
+    printf(CYAN "========================================\n" RESET);
+    printf("Total medicines in inventory: " YELLOW "%d\n" RESET, medicine_count);
+}
+
+// Medicine Management Menu
+void medicineManagementMenu() {
+    int choice;
+
+    do {
+        clearScreen();
+        printf(CYAN "========================================\n");
+        printf(BOLD "       MEDICINE & EQUIPMENT            \n");
+        printf("========================================\n" RESET);
+        printf(GREEN "  1. Add Medicine                      \n" RESET);
+        printf(RED "  2. Back to Main Menu                 \n" RESET);
+        printf(CYAN "========================================\n" RESET);
+        printf(BLUE "Enter your choice: " RESET);
+        scanf("%d", &choice);
+
+        clearScreen();
+
+        switch(choice) {
+            case 1:
+                addMedicine();
+                pauseScreen();
+                break;
+            case 2:
+                printf(GREEN "Returning to Main Menu...\n" RESET);
+                break;
+            default:
+                printf(RED "Invalid choice! Please try again.\n" RESET);
+                pauseScreen();
+        }
+    } while(choice != 2);
 }
