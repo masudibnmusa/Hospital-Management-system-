@@ -3,11 +3,18 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <errno.h>
 #ifdef _WIN32
 #include <conio.h>
 #else
 #include <termios.h>
 #include <unistd.h>
+#endif
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
 #endif
 
 // Color codes
@@ -142,6 +149,7 @@ void unpaidBillsReport();
 void departmentRevenue();
 int validateDate(const char *date);
 int validateTime12(const char *time_str);
+void backupData();
 
 // Utility function to safely clear input buffer
 void clearInputBuffer() {
@@ -352,7 +360,8 @@ void adminMenu() {
         printf(GREEN "  1. Doctor Management                 \n" RESET);
         printf(YELLOW "  2. Staff Management                  \n" RESET);
         printf(MAGENTA "  3. Reports & Analytics               \n" RESET);
-        printf(RED "  4. Logout                            \n" RESET);
+        printf(CYAN  "  4. Database Management               \n" RESET);
+        printf(RED   "  5. Logout                            \n" RESET);
         printf(CYAN "========================================\n" RESET);
         printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
@@ -370,6 +379,10 @@ void adminMenu() {
                 reportsAndAnalyticsMenu();
                 break;
             case 4:
+                backupData();
+                pauseScreen();
+                break;
+            case 5:
                 printf(GREEN "========================================\n");
                 printf("    Logged out successfully!           \n");
                 printf("========================================\n" RESET);
@@ -378,7 +391,7 @@ void adminMenu() {
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 4);
+    } while(choice != 5);
 }
 
 // Doctor Management Menu
@@ -2294,6 +2307,94 @@ void monthlyRevenueReport() {
         printf("Average Daily Revenue: " GREEN "$%.2f\n" RESET, monthly_total / 30.0);
     }
     
+    printf(CYAN "========================================\n" RESET);
+}
+
+// Create timestamped backups of all .dat files into backups/YYYYMMDD_HHMMSS/
+static int ensure_dir(const char *path) {
+#ifdef _WIN32
+    if (_mkdir(path) == 0 || errno == EEXIST) return 1;
+    // If directory already exists, _mkdir returns -1 and errno==EEXIST
+    return (errno == EEXIST);
+#else
+    if (mkdir(path, 0755) == 0 || errno == EEXIST) return 1;
+    return (errno == EEXIST);
+#endif
+}
+
+static int copyBinaryFile(const char *src, const char *dst) {
+    FILE *in = fopen(src, "rb");
+    if (!in) return 0;
+    FILE *out = fopen(dst, "wb");
+    if (!out) { fclose(in); return 0; }
+    char buf[65536];
+    size_t n;
+    int ok = 1;
+    while ((n = fread(buf, 1, sizeof(buf), in)) > 0) {
+        if (fwrite(buf, 1, n, out) != n) { ok = 0; break; }
+    }
+    fclose(in);
+    fclose(out);
+    return ok;
+}
+
+void backupData() {
+    // Prepare timestamp
+    time_t t = time(NULL);
+    struct tm tmv = *localtime(&t);
+    char ts[32];
+    sprintf(ts, "%04d%02d%02d_%02d%02d%02d", tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday,
+            tmv.tm_hour, tmv.tm_min, tmv.tm_sec);
+
+    // Ensure base backups directory and timestamp subdir
+    if (!ensure_dir("backups")) {
+        printf(RED "Failed to create/access 'backups' directory.\n" RESET);
+        return;
+    }
+    char subdir[128];
+    sprintf(subdir, "backups/%s", ts);
+    if (!ensure_dir(subdir)) {
+        printf(RED "Failed to create backup subdirectory: %s\n" RESET, subdir);
+        return;
+    }
+
+    const char *files[] = {"patients.dat", "doctors.dat", "appointments.dat", "bills.dat", "staff.dat"};
+    int total = 0, success = 0;
+
+    printf(CYAN "========================================\n");
+    printf(BOLD "           DATABASE BACKUP             \n");
+    printf("========================================\n" RESET);
+    printf("Destination: " YELLOW "%s\n" RESET, subdir);
+    printf(CYAN "----------------------------------------\n" RESET);
+
+    for (int i = 0; i < (int)(sizeof(files)/sizeof(files[0])); i++) {
+        const char *src = files[i];
+        total++;
+        // Check if source exists
+        FILE *test = fopen(src, "rb");
+        if (!test) {
+            printf(YELLOW "Skipped (not found): %s\n" RESET, src);
+            continue;
+        }
+        fclose(test);
+        char dst[256];
+        sprintf(dst, "%s/%s", subdir, src);
+        if (copyBinaryFile(src, dst)) {
+            printf(GREEN "Backed up: %s -> %s\n" RESET, src, dst);
+            success++;
+        } else {
+            printf(RED "Failed: %s\n" RESET, src);
+        }
+    }
+
+    printf(CYAN "----------------------------------------\n" RESET);
+    printf("Files processed: " YELLOW "%d\n" RESET, total);
+    printf("Files backed up: " GREEN "%d\n" RESET, success);
+    if (success > 0) {
+        printf(GREEN "Backup completed successfully.\n" RESET);
+    } else {
+        printf(RED "No files were backed up.\n" RESET);
+    }
     printf(CYAN "========================================\n" RESET);
 }
 
