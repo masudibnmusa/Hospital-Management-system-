@@ -161,13 +161,13 @@ void clearScreen() {
 // Utility function to pause screen
 void pauseScreen() {
     printf("\nPress Enter to continue...");
-
+    
     // Clear any pending input first
     clearInputBuffer();
-
+    
     // Wait for Enter key
     int c = getchar();
-
+    
     // Handle EOF or error conditions
     if (c == EOF) {
         clearerr(stdin);
@@ -359,7 +359,7 @@ void doctorManagementMenu() {
             case 6:
                 viewDoctorStatistics();
                 pauseScreen();
-                break;
+                break;    
             case 7:
                 {
                     int doctor_id;
@@ -371,7 +371,7 @@ void doctorManagementMenu() {
                 break;
             case 8:
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
-                break;
+                break;    
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
@@ -401,28 +401,28 @@ void staffManagementMenu() {
         clearScreen();
 
         switch(choice) {
-            case 1:
+            case 1: 
                 addStaff();
                 break;
-            case 2:
+            case 2: 
                 viewStaff();
                 break;
-            case 3:
+            case 3: 
                 editStaff();
                 break;
-            case 4:
+            case 4: 
                 deleteStaff();
                 break;
-            case 5:
+            case 5: 
                 assignDutyRoster();
                 break;
-            case 6:
+            case 6: 
                 searchStaff();
                 break;
-            case 7:
+            case 7: 
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
-            default:
+            default: 
                 printf(RED "Invalid choice!\n" RESET);
         }
         if(choice != 7) pauseScreen();
@@ -1873,7 +1873,7 @@ void viewDoctorStatistics() {
 
     for(int i = 0; i < doctor_count; i++) {
         int doctor_appointments = 0;
-
+        
         // Count appointments for this doctor
         for(int j = 0; j < appointment_count; j++) {
             if(appointments[j].doctor_id == doctors[i].id) {
@@ -1886,7 +1886,7 @@ void viewDoctorStatistics() {
         printf(GREEN "%d\t" RESET, doctors[i].id);
         printf(CYAN "%-20s\t" RESET, doctors[i].name);
         printf(MAGENTA "%-20s\t" RESET, doctors[i].specialization);
-
+        
         if(doctor_appointments > 0) {
             printf(YELLOW "%d\n" RESET, doctor_appointments);
         } else {
@@ -1896,16 +1896,16 @@ void viewDoctorStatistics() {
 
     printf(CYAN "================================================================================\n" RESET);
     printf(YELLOW "\nTotal Appointments across all doctors: %d\n" RESET, total_appointments);
-
+    
     if(doctor_count > 0) {
-        printf(YELLOW "Average appointments per doctor: %.2f\n" RESET,
+        printf(YELLOW "Average appointments per doctor: %.2f\n" RESET, 
                (float)total_appointments / doctor_count);
     }
 
     // Find most active doctor
     int max_appointments = 0;
     int most_active_index = -1;
-
+    
     for(int i = 0; i < doctor_count; i++) {
         int count = 0;
         for(int j = 0; j < appointment_count; j++) {
@@ -1920,7 +1920,7 @@ void viewDoctorStatistics() {
     }
 
     if(most_active_index >= 0 && max_appointments > 0) {
-        printf(GREEN "\nMost Active Doctor: %s (%d appointments)\n" RESET,
+        printf(GREEN "\nMost Active Doctor: %s (%d appointments)\n" RESET, 
                doctors[most_active_index].name, max_appointments);
     }
 
@@ -1928,7 +1928,7 @@ void viewDoctorStatistics() {
     printf(CYAN "\n========================================\n");
     printf("    Specialization Distribution         \n");
     printf("========================================\n" RESET);
-
+    
     // Simple specialization count (can be improved with dynamic allocation)
     char specializations[100][50];
     int spec_count[100] = {0};
@@ -1978,7 +1978,7 @@ void viewDoctorDetails(int doctor_id) {
             // Show appointments for this doctor
             printf(YELLOW "\nAppointments:\n" RESET);
             printf("--------------------------------------------------------------------------------\n");
-
+            
             int has_appointments = 0;
             for(int j = 0; j < appointment_count; j++) {
                 if(appointments[j].doctor_id == doctor_id) {
@@ -2036,7 +2036,7 @@ void dailyRevenueReport() {
             printf("%d\t\t" RESET, bills[i].patient_id);
             printf(YELLOW "$%.2f\t\t" RESET, bills[i].total_amount);
             printf(BLUE "%s\n" RESET, bills[i].status);
-
+            
             daily_total += bills[i].total_amount;
             daily_bills++;
         }
@@ -2046,11 +2046,11 @@ void dailyRevenueReport() {
     printf(YELLOW "\nDaily Summary:\n" RESET);
     printf("Total Bills Generated: " GREEN "%d\n" RESET, daily_bills);
     printf("Total Revenue        : " GREEN "$%.2f\n" RESET, daily_total);
-
+    
     if(daily_bills > 0) {
         printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, daily_total / daily_bills);
     }
-
+    
     printf(CYAN "========================================\n" RESET);
 }
 
@@ -2088,7 +2088,7 @@ void monthlyRevenueReport() {
     for(int i = 0; i < bill_count; i++) {
         int bill_month, bill_year, bill_day;
         sscanf(bills[i].date, "%d/%d/%d", &bill_day, &bill_month, &bill_year);
-
+        
         if(bill_month == month && bill_year == year) {
             monthly_total += bills[i].total_amount;
             monthly_bills++;
@@ -2107,7 +2107,7 @@ void monthlyRevenueReport() {
                     day_bill_count++;
                 }
             }
-            printf("%02d/%02d/%d\t" YELLOW "%d\t\t" GREEN "$%.2f\n" RESET,
+            printf("%02d/%02d/%d\t" YELLOW "%d\t\t" GREEN "$%.2f\n" RESET, 
                    day, month, year, day_bill_count, days[day]);
         }
     }
@@ -2116,12 +2116,12 @@ void monthlyRevenueReport() {
     printf(YELLOW "\nMonthly Summary:\n" RESET);
     printf("Total Bills Generated: " GREEN "%d\n" RESET, monthly_bills);
     printf("Total Revenue        : " GREEN "$%.2f\n" RESET, monthly_total);
-
+    
     if(monthly_bills > 0) {
         printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, monthly_total / monthly_bills);
         printf("Average Daily Revenue: " GREEN "$%.2f\n" RESET, monthly_total / 30.0);
     }
-
+    
     printf(CYAN "========================================\n" RESET);
 }
 
@@ -2153,7 +2153,7 @@ void yearlyRevenueReport() {
     for(int i = 0; i < bill_count; i++) {
         int bill_month, bill_year, bill_day;
         sscanf(bills[i].date, "%d/%d/%d", &bill_day, &bill_month, &bill_year);
-
+        
         if(bill_year == year) {
             yearly_total += bills[i].total_amount;
             yearly_bills++;
@@ -2165,11 +2165,11 @@ void yearlyRevenueReport() {
     // Display monthly breakdown
     char* months[] = {"", "January", "February", "March", "April", "May", "June",
                      "July", "August", "September", "October", "November", "December"};
-
+    
     for(int month = 1; month <= 12; month++) {
         if(monthly_bills[month] > 0) {
             float avg_bill = monthly_totals[month] / monthly_bills[month];
-            printf("%-10s\t" YELLOW "%d\t\t" GREEN "$%-10.2f\t$%-10.2f\n" RESET,
+            printf("%-10s\t" YELLOW "%d\t\t" GREEN "$%-10.2f\t$%-10.2f\n" RESET, 
                    months[month], monthly_bills[month], monthly_totals[month], avg_bill);
         }
     }
@@ -2178,16 +2178,16 @@ void yearlyRevenueReport() {
     printf(YELLOW "\nYearly Summary:\n" RESET);
     printf("Total Bills Generated: " GREEN "%d\n" RESET, yearly_bills);
     printf("Total Revenue        : " GREEN "$%.2f\n" RESET, yearly_total);
-
+    
     if(yearly_bills > 0) {
         printf("Average Bill Amount  : " GREEN "$%.2f\n" RESET, yearly_total / yearly_bills);
         printf("Average Monthly Revenue: " GREEN "$%.2f\n" RESET, yearly_total / 12.0);
     }
-
+    
     // Find best and worst months
     float max_revenue = 0, min_revenue = yearly_total;
     int best_month = 0, worst_month = 0;
-
+    
     for(int month = 1; month <= 12; month++) {
         if(monthly_totals[month] > max_revenue) {
             max_revenue = monthly_totals[month];
@@ -2198,14 +2198,14 @@ void yearlyRevenueReport() {
             worst_month = month;
         }
     }
-
+    
     if(best_month > 0) {
         printf("Best Month          : " GREEN "%s ($%.2f)\n" RESET, months[best_month], max_revenue);
     }
     if(worst_month > 0) {
         printf("Worst Month         : " RED "%s ($%.2f)\n" RESET, months[worst_month], min_revenue);
     }
-
+    
     printf(CYAN "========================================\n" RESET);
 }
 
@@ -2229,10 +2229,10 @@ void unpaidBillsReport() {
     printf("--------------------------------------------------------------------------------\n" RESET);
 
     for(int i = 0; i < bill_count; i++) {
-        if(strcmp(bills[i].status, "Generated") == 0 ||
+        if(strcmp(bills[i].status, "Generated") == 0 || 
            strstr(bills[i].status, "Unpaid") != NULL ||
            strstr(bills[i].status, "Pending") != NULL) {
-
+            
             // Find patient name
             char patient_name[50] = "Unknown";
             for(int j = 0; j < patient_count; j++) {
@@ -2247,7 +2247,7 @@ void unpaidBillsReport() {
             printf(RED "$%.2f\t" RESET, bills[i].total_amount);
             printf(CYAN "%s\t" RESET, bills[i].date);
             printf(YELLOW "%s\n" RESET, patient_name);
-
+            
             total_outstanding += bills[i].total_amount;
             unpaid_count++;
         }
@@ -2257,11 +2257,11 @@ void unpaidBillsReport() {
     printf(YELLOW "\nOutstanding Payments Summary:\n" RESET);
     printf("Total Unpaid Bills : " RED "%d\n" RESET, unpaid_count);
     printf("Total Amount Due   : " RED "$%.2f\n" RESET, total_outstanding);
-
+    
     if(unpaid_count > 0) {
         printf("Average Unpaid Bill : " RED "$%.2f\n" RESET, total_outstanding / unpaid_count);
     }
-
+    
     printf(CYAN "========================================\n" RESET);
 }
 
@@ -2292,7 +2292,7 @@ void departmentRevenue() {
         // Find which doctor this bill is associated with through appointments
         int patient_id = bills[i].patient_id;
         char department[50] = "General";
-
+        
         // Try to find an appointment for this patient to get doctor info
         for(int j = 0; j < appointment_count; j++) {
             if(appointments[j].patient_id == patient_id) {
@@ -2318,7 +2318,7 @@ void departmentRevenue() {
                 break;
             }
         }
-
+        
         if(!found && dept_count < 50) {
             strcpy(departments[dept_count], department);
             dept_revenue[dept_count] = bills[i].total_amount;
@@ -2330,12 +2330,12 @@ void departmentRevenue() {
     // Display department revenue
     float grand_total = 0;
     int total_bills = 0;
-
+    
     for(int i = 0; i < dept_count; i++) {
         float avg_revenue = dept_revenue[i] / dept_bills[i];
-        printf("%-25s\t" YELLOW "%d\t\t" GREEN "$%-10.2f\t$%-10.2f\n" RESET,
+        printf("%-25s\t" YELLOW "%d\t\t" GREEN "$%-10.2f\t$%-10.2f\n" RESET, 
                departments[i], dept_bills[i], dept_revenue[i], avg_revenue);
-
+        
         grand_total += dept_revenue[i];
         total_bills += dept_bills[i];
     }
@@ -2345,7 +2345,7 @@ void departmentRevenue() {
     printf("Total Departments   : " GREEN "%d\n" RESET, dept_count);
     printf("Total Bills         : " GREEN "%d\n" RESET, total_bills);
     printf("Grand Total Revenue : " GREEN "$%.2f\n" RESET, grand_total);
-
+    
     if(dept_count > 0) {
         // Find top performing department
         float max_revenue = 0;
@@ -2358,6 +2358,6 @@ void departmentRevenue() {
         }
         printf("Top Department      : " GREEN "%s ($%.2f)\n" RESET, departments[top_dept], max_revenue);
     }
-
+    
     printf(CYAN "========================================\n" RESET);
 }
