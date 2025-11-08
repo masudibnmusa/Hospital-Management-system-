@@ -150,6 +150,8 @@ void departmentRevenue();
 int validateDate(const char *date);
 int validateTime12(const char *time_str);
 void backupData();
+void restoreData();
+void databaseManagementMenu();
 
 // Utility function to safely clear input buffer
 void clearInputBuffer() {
@@ -379,8 +381,7 @@ void adminMenu() {
                 reportsAndAnalyticsMenu();
                 break;
             case 4:
-                backupData();
-                pauseScreen();
+                databaseManagementMenu();
                 break;
             case 5:
                 printf(GREEN "========================================\n");
@@ -2396,6 +2397,141 @@ void backupData() {
         printf(RED "No files were backed up.\n" RESET);
     }
     printf(CYAN "========================================\n" RESET);
+}
+
+// Restore data from backup
+void restoreData() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "          DATABASE RESTORE             \n");
+    printf("========================================\n" RESET);
+    
+    // List available backups
+    printf(YELLOW "\nListing available backups...\n" RESET);
+    printf(CYAN "----------------------------------------\n" RESET);
+    
+#ifdef _WIN32
+    system("dir /b /ad backups 2>nul");
+#else
+    system("ls -1 backups/ 2>/dev/null");
+#endif
+    
+    printf(CYAN "----------------------------------------\n" RESET);
+    printf(BLUE "\nEnter backup folder name (e.g., 20250108_105530): " RESET);
+    
+    char backup_name[64];
+    scanf("%63s", backup_name);
+    
+    char backup_path[200];
+    sprintf(backup_path, "backups/%s", backup_name);
+    
+    // Check if backup directory exists
+    FILE *test = fopen(backup_path, "r");
+    if (test) {
+        fclose(test);
+    } else {
+        // Try to open one of the expected files to verify the directory
+        char test_file[256];
+        sprintf(test_file, "%s/patients.dat", backup_path);
+        test = fopen(test_file, "rb");
+        if (!test) {
+            printf(RED "\nBackup folder not found or empty!\n" RESET);
+            return;
+        }
+        fclose(test);
+    }
+    
+    // Warning and confirmation
+    printf(RED "\n*** WARNING ***\n" RESET);
+    printf(YELLOW "This will overwrite all current data!\n");
+    printf("Current data will be lost if not backed up.\n" RESET);
+    printf(BLUE "\nDo you want to continue? (y/n): " RESET);
+    
+    char confirm;
+    scanf(" %c", &confirm);
+    
+    if (confirm != 'y' && confirm != 'Y') {
+        printf(YELLOW "\nRestore operation cancelled.\n" RESET);
+        return;
+    }
+    
+    // Restore files
+    const char *files[] = {"patients.dat", "doctors.dat", "appointments.dat", "bills.dat", "staff.dat"};
+    int total = 0, success = 0;
+    
+    printf(CYAN "\n========================================\n");
+    printf(BOLD "          RESTORING DATA...            \n");
+    printf("========================================\n" RESET);
+    
+    for (int i = 0; i < (int)(sizeof(files)/sizeof(files[0])); i++) {
+        char src[256], dst[100];
+        sprintf(src, "%s/%s", backup_path, files[i]);
+        strcpy(dst, files[i]);
+        total++;
+        
+        // Check if backup file exists
+        FILE *test = fopen(src, "rb");
+        if (!test) {
+            printf(YELLOW "Skipped (not in backup): %s\n" RESET, files[i]);
+            continue;
+        }
+        fclose(test);
+        
+        if (copyBinaryFile(src, dst)) {
+            printf(GREEN "Restored: %s <- %s\n" RESET, dst, src);
+            success++;
+        } else {
+            printf(RED "Failed to restore: %s\n" RESET, files[i]);
+        }
+    }
+    
+    printf(CYAN "----------------------------------------\n" RESET);
+    printf("Files processed: " YELLOW "%d\n" RESET, total);
+    printf("Files restored : " GREEN "%d\n" RESET, success);
+    
+    if (success > 0) {
+        printf(GREEN "\nRestore completed successfully!\n" RESET);
+        printf(YELLOW "Please restart the application to load restored data.\n" RESET);
+    } else {
+        printf(RED "\nNo files were restored.\n" RESET);
+    }
+    printf(CYAN "========================================\n" RESET);
+}
+
+// Database Management Menu
+void databaseManagementMenu() {
+    int choice;
+    
+    do {
+        clearScreen();
+        printf(CYAN "========================================\n");
+        printf(BOLD "        DATABASE MANAGEMENT            \n");
+        printf("========================================\n" RESET);
+        printf(GREEN "  1. Backup Database                   \n" RESET);
+        printf(YELLOW "  2. Restore Database                  \n" RESET);
+        printf(RED "  3. Back to Admin Menu                \n" RESET);
+        printf(CYAN "========================================\n" RESET);
+        printf(BLUE "Enter your choice: " RESET);
+        scanf("%d", &choice);
+        
+        clearScreen();
+        
+        switch(choice) {
+            case 1:
+                backupData();
+                pauseScreen();
+                break;
+            case 2:
+                restoreData();
+                pauseScreen();
+                break;
+            case 3:
+                printf(GREEN "Returning to Admin Menu...\n" RESET);
+                break;
+            default:
+                printf(RED "Invalid choice! Please try again.\n" RESET);
+                pauseScreen();
+        }
+    } while(choice != 3);
 }
 
 // Yearly statistics
