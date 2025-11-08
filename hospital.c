@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 #ifdef _WIN32
 #include <conio.h>
 #else
@@ -139,6 +140,8 @@ void monthlyRevenueReport();
 void yearlyRevenueReport();
 void unpaidBillsReport();
 void departmentRevenue();
+int validateDate(const char *date);
+int validateTime12(const char *time_str);
 
 // Utility function to safely clear input buffer
 void clearInputBuffer() {
@@ -162,15 +165,82 @@ void clearScreen() {
 void pauseScreen() {
     printf("\nPress Enter to continue...");
 
-    // Read until newline or EOF (consumes leftover newline if present, or waits for one)
-    int c;
-    do {
-        c = getchar();
-        if (c == EOF) {
-            clearerr(stdin);
-            break;
-        }
-    } while (c != '\n');
+    // Clear any pending input first
+    clearInputBuffer();
+
+    // Wait for Enter key
+    int c = getchar();
+
+    // Handle EOF or error conditions
+    if (c == EOF) {
+        clearerr(stdin);
+    }
+}
+
+// Validate date in DD/MM/YYYY format and logical calendar correctness
+int validateDate(const char *date) {
+    if (!date) return 0;
+    // Expect length 10: DD/MM/YYYY
+    if (strlen(date) != 10) return 0;
+    if (date[2] != '/' || date[5] != '/') return 0;
+
+    int d = 0, m = 0, y = 0;
+    // Ensure exactly digits in expected places using sscanf and trailing char check
+    char extra;
+    if (sscanf(date, "%2d/%2d/%4d%c", &d, &m, &y, &extra) != 3) {
+        return 0;
+    }
+
+    if (y < 1900 || y > 9999) return 0;
+    if (m < 1 || m > 12) return 0;
+
+    int mdays[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
+    // leap year adjustment
+    int leap = ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0));
+    if (leap) mdays[2] = 29;
+
+    if (d < 1 || d > mdays[m]) return 0;
+    return 1;
+}
+
+// Validate time in 12-hour format with AM/PM. Accepts "HH:MM AM" or "HH:MMAM".
+int validateTime12(const char *time_str) {
+    if (!time_str) return 0;
+    char buf[32];
+    size_t len = strlen(time_str);
+    if (len == 0 || len >= sizeof(buf)) return 0;
+
+    // Trim leading/trailing spaces
+    size_t start = 0, end = len;
+    while (start < len && (time_str[start] == ' ' || time_str[start] == '\t')) start++;
+    while (end > start && (time_str[end-1] == ' ' || time_str[end-1] == '\t')) end--;
+    size_t n = end - start;
+    if (n < 6 || n > 8) {
+        // Minimal like 1:05AM (6) up to 12:59 PM (8)
+        // We'll still parse strictly below; this precheck is just to weed out obviously bad sizes.
+    }
+    memcpy(buf, time_str + start, n);
+    buf[n] = '\0';
+
+    int h = -1, m = -1, consumed = 0;
+    char ap[3] = {0};
+
+    // Try patterns with and without space before AM/PM
+    if (!(sscanf(buf, "%2d:%2d %2s%n", &h, &m, ap, &consumed) == 3 && consumed == (int)strlen(buf)) &&
+        !(sscanf(buf, "%2d:%2d%2s%n", &h, &m, ap, &consumed) == 3 && consumed == (int)strlen(buf))) {
+        return 0;
+    }
+
+    // Normalize AM/PM
+    ap[0] = (char)toupper((unsigned char)ap[0]);
+    ap[1] = (char)toupper((unsigned char)ap[1]);
+    ap[2] = '\0';
+
+    if (!((ap[0] == 'A' && ap[1] == 'M') || (ap[0] == 'P' && ap[1] == 'M'))) return 0;
+    if (h < 1 || h > 12) return 0;
+    if (m < 0 || m > 59) return 0;
+
+    return 1;
 }
 
 int main() {
@@ -807,14 +877,32 @@ void scheduleAppointment() {
         return;
     }
 
-    printf(BLUE "\nEnter date (DD/MM/YYYY): " RESET);
-    scanf("%19s", a.date);
+    // Read and validate date
+    while (1) {
+        printf(BLUE "\nEnter date (DD/MM/YYYY): " RESET);
+        scanf("%19s", a.date);
+        if (validateDate(a.date)) break;
+        printf(RED "Invalid date. Use DD/MM/YYYY and a real calendar date.\n" RESET);
+    }
 
-    printf(BLUE "Enter time (HH:MM): " RESET);
-    scanf("%9s", a.time);
+    // Read and validate time (12-hour with AM/PM)
+    {
+        char timebuf[32];
+        clearInputBuffer();
+        while (1) {
+            printf(BLUE "Enter time (HH:MM AM/PM): " RESET);
+            if (!fgets(timebuf, sizeof(timebuf), stdin)) { clearerr(stdin); continue; }
+            timebuf[strcspn(timebuf, "\n")] = 0;
+            if (validateTime12(timebuf)) {
+                strncpy(a.time, timebuf, sizeof(a.time) - 1);
+                a.time[sizeof(a.time) - 1] = '\0';
+                break;
+            }
+            printf(RED "Invalid time. Use HH:MM AM/PM with 12-hour clock.\n" RESET);
+        }
+    }
 
     printf(BLUE "Enter purpose: " RESET);
-    getchar();
     fgets(a.purpose, 100, stdin);
     a.purpose[strcspn(a.purpose, "\n")] = 0;
 
@@ -902,8 +990,13 @@ void generateBill() {
     printf(BLUE "Enter lab charges: " RESET);
     scanf("%f", &b.lab_charges);
 
-    printf(BLUE "Enter date (DD/MM/YYYY): " RESET);
-    scanf("%19s", b.date);
+    // Read and validate date
+    while (1) {
+        printf(BLUE "Enter date (DD/MM/YYYY): " RESET);
+        scanf("%19s", b.date);
+        if (validateDate(b.date)) break;
+        printf(RED "Invalid date. Use DD/MM/YYYY and a real calendar date.\n" RESET);
+    }
 
     b.total_amount = b.consultation_fee + b.medicine_charges +
                     b.room_charges + b.lab_charges;
