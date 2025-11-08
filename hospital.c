@@ -592,6 +592,48 @@ void reportsAndAnalyticsMenu() {
     } while(choice != 6);
 }
 
+// Medicine Management Menu
+void medicineManagementMenu() {
+    int choice;
+
+    do {
+        clearScreen();
+        printf(CYAN "========================================\n");
+        printf(BOLD "       MEDICINE & EQUIPMENT            \n");
+        printf("========================================\n" RESET);
+        printf(GREEN "  1. Add Medicine                      \n" RESET);
+        printf(YELLOW "  2. Available Medicine                \n" RESET);
+        printf(MAGENTA "  3. Update Stock                      \n" RESET);
+        printf(RED "  4. Back to Main Menu                 \n" RESET);
+        printf(CYAN "========================================\n" RESET);
+        printf(BLUE "Enter your choice: " RESET);
+        scanf("%d", &choice);
+
+        clearScreen();
+
+        switch(choice) {
+            case 1:
+                addMedicine();
+                pauseScreen();
+                break;
+            case 2:
+                viewMedicineStock();
+                pauseScreen();
+                break;
+            case 3:
+                updateStock();
+                pauseScreen();
+                break;
+            case 4:
+                printf(GREEN "Returning to Main Menu...\n" RESET);
+                break;
+            default:
+                printf(RED "Invalid choice! Please try again.\n" RESET);
+                pauseScreen();
+        }
+    } while(choice != 4);
+}
+
 // Patient Management Functions
 void addPatient() {
     if(patient_count >= 1000) {
@@ -3426,44 +3468,4 @@ void updateStock() {
     printf(CYAN "========================================\n" RESET);
 }
 
-// Medicine Management Menu
-void medicineManagementMenu() {
-    int choice;
 
-    do {
-        clearScreen();
-        printf(CYAN "========================================\n");
-        printf(BOLD "       MEDICINE & EQUIPMENT            \n");
-        printf("========================================\n" RESET);
-        printf(GREEN "  1. Add Medicine                      \n" RESET);
-        printf(YELLOW "  2. Available Medicine                \n" RESET);
-        printf(MAGENTA "  3. Update Stock                      \n" RESET);
-        printf(RED "  4. Back to Main Menu                 \n" RESET);
-        printf(CYAN "========================================\n" RESET);
-        printf(BLUE "Enter your choice: " RESET);
-        scanf("%d", &choice);
-
-        clearScreen();
-
-        switch(choice) {
-            case 1:
-                addMedicine();
-                pauseScreen();
-                break;
-            case 2:
-                viewMedicineStock();
-                pauseScreen();
-                break;
-            case 3:
-                updateStock();
-                pauseScreen();
-                break;
-            case 4:
-                printf(GREEN "Returning to Main Menu...\n" RESET);
-                break;
-            default:
-                printf(RED "Invalid choice! Please try again.\n" RESET);
-                pauseScreen();
-        }
-    } while(choice != 4);
-}
