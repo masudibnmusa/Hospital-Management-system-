@@ -1,0 +1,204 @@
+╔═══════════════════════════════════════════════════════════════╗
+║         AVAILABLE MEDICINE FEATURE - SUMMARY                  ║
+╚═══════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────┐
+│  FEATURE OVERVIEW                                             │
+└───────────────────────────────────────────────────────────────┘
+
+A comprehensive medicine stock viewer with intelligent 
+inventory management features including:
+  • Complete medicine listing
+  • Automatic expiry checking
+  • Low stock alerts
+  • Inventory value calculation
+  • Color-coded status indicators
+
+┌───────────────────────────────────────────────────────────────┐
+│  HOW TO ACCESS                                                │
+└───────────────────────────────────────────────────────────────┘
+
+Main Menu → 10. Medicine & Equipment → 2. Available Medicine
+
+┌───────────────────────────────────────────────────────────────┐
+│  DISPLAY FEATURES                                             │
+└───────────────────────────────────────────────────────────────┘
+
+█ MEDICINE TABLE
+  Columns displayed:
+  • ID              - Medicine identification number
+  • Medicine Name   - Full name of the medicine
+  • Category        - Type (Tablet/Syrup/Injection/etc.)
+  • Quantity        - Current stock (units)
+  • Price           - Price per unit ($)
+  • Expiry Date     - Expiration date (DD/MM/YYYY)
+
+█ COLOR CODING SYSTEM
+  ✓ GREEN    - Good stock (50 or more units)
+  ⚠ YELLOW   - Low stock (less than 50 units)
+  ✗ RED      - Out of stock (0 units) OR Expired
+
+█ AUTOMATIC EXPIRY DETECTION
+  • Compares expiry date with current system date
+  • Automatically marks expired medicines
+  • Shows "(EXPIRED)" tag in red for expired items
+  • Real-time date comparison
+
+█ INVENTORY SUMMARY
+  Displays at bottom of report:
+  • Total Medicines        - Count of different medicines
+  • Low Stock Items        - Count of items with < 50 units
+  • Expired Items          - Count of expired medicines
+  • Total Units in Stock   - Sum of all quantities
+  • Total Inventory Value  - Sum of (price × quantity)
+
+█ COLOR LEGEND
+  Included at bottom for easy reference
+
+┌───────────────────────────────────────────────────────────────┐
+│  EXAMPLE OUTPUT                                               │
+└───────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════╗
+║              AVAILABLE MEDICINE                           ║
+╚═══════════════════════════════════════════════════════════╝
+
+Total Medicines in Stock: 5
+
+═══════════════════════════════════════════════════════════════
+ID   Medicine Name           Category      Qty  Price   Expiry
+───────────────────────────────────────────────────────────────
+3001 Paracetamol 500mg       Tablet        500  $2.50   31/12/2025
+3002 Amoxicillin 250mg       Capsule       30   $5.00   15/06/2024 (LOW)
+3003 Cough Syrup 100ml       Syrup         0    $8.50   20/01/2023 (EXPIRED)
+3004 Aspirin 75mg            Tablet        1000 $1.50   01/08/2026
+3005 Insulin Injection       Injection     45   $25.00  10/05/2025 (LOW)
+═══════════════════════════════════════════════════════════════
+
+=== INVENTORY SUMMARY ===
+Total Medicines        : 5
+Low Stock Items        : 2 (< 50 units)
+Expired Items          : 1
+Total Units in Stock   : 1575
+Total Inventory Value  : $4,737.50
+
+Color Legend:
+  Green   - Good stock (50+ units)
+  Yellow  - Low stock (< 50 units)
+  Red     - Out of stock or Expired
+
+┌───────────────────────────────────────────────────────────────┐
+│  TECHNICAL DETAILS                                            │
+└───────────────────────────────────────────────────────────────┘
+
+Function: viewMedicineStock()
+Lines of Code: ~115 lines
+Dependencies: 
+  - time.h (for current date)
+  - Medicine array
+  - medicine_count variable
+
+Algorithm:
+1. Check if inventory is empty
+2. Get current system date/time
+3. For each medicine:
+   - Parse expiry date
+   - Compare with current date
+   - Check stock level
+   - Apply appropriate color coding
+4. Calculate summary statistics
+5. Display formatted table
+6. Show inventory summary
+7. Display color legend
+
+┌───────────────────────────────────────────────────────────────┐
+│  KEY FEATURES & BENEFITS                                      │
+└───────────────────────────────────────────────────────────────┘
+
+✓ AUTOMATIC MONITORING
+  - No manual date checking required
+  - System automatically identifies expired items
+  - Instant visibility of inventory status
+
+✓ LOW STOCK ALERTS
+  - Visual warnings for items below 50 units
+  - Helps prevent stockouts
+  - Yellow color coding for immediate attention
+
+✓ FINANCIAL TRACKING
+  - Total inventory value calculation
+  - Helps with asset management
+  - Useful for accounting and budgeting
+
+✓ PROFESSIONAL PRESENTATION
+  - Clean, formatted table layout
+  - Color-coded for quick scanning
+  - Comprehensive summary section
+
+✓ DECISION SUPPORT
+  - Identifies which items need reordering
+  - Shows expired items that need disposal
+  - Calculates total stock value
+
+┌───────────────────────────────────────────────────────────────┐
+│  USE CASES                                                    │
+└───────────────────────────────────────────────────────────────┘
+
+1. Daily Inventory Check
+   → Quick overview of medicine availability
+
+2. Stock Replenishment
+   → Identify low stock items needing reorder
+
+3. Expiry Management
+   → Find expired medicines for disposal
+
+4. Financial Reporting
+   → Calculate total inventory value
+
+5. Audit Preparation
+   → Complete inventory listing with values
+
+6. Emergency Checks
+   → Quickly verify if specific medicines available
+
+┌───────────────────────────────────────────────────────────────┐
+│  STOCK LEVEL THRESHOLDS                                       │
+└───────────────────────────────────────────────────────────────┘
+
+┌──────────────┬──────────────┬──────────────────────────────┐
+│ QUANTITY     │ COLOR        │ STATUS                       │
+├──────────────┼──────────────┼──────────────────────────────┤
+│ 50+ units    │ GREEN        │ Good stock                   │
+│ 1-49 units   │ YELLOW       │ Low stock - reorder soon     │
+│ 0 units      │ RED          │ Out of stock - urgent!       │
+│ Any (expired)│ RED          │ Expired - remove/dispose     │
+└──────────────┴──────────────┴──────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────┐
+│  COMPILATION STATUS                                           │
+└───────────────────────────────────────────────────────────────┘
+
+✓ Compilation: SUCCESS
+✓ Warnings: NONE
+✓ Errors: NONE
+
+Command used:
+  gcc hospital.c -o hospital.exe
+
+┌───────────────────────────────────────────────────────────────┐
+│  INTEGRATION                                                  │
+└───────────────────────────────────────────────────────────────┘
+
+The function integrates seamlessly with:
+  ✓ Medicine data structure
+  ✓ Medicine array and counter
+  ✓ Existing color scheme
+  ✓ Date validation system
+  ✓ Menu navigation system
+
+╔═══════════════════════════════════════════════════════════════╗
+║  The Available Medicine feature provides comprehensive        ║
+║  visibility into medicine inventory with intelligent          ║
+║  monitoring and professional reporting capabilities.          ║
+╚═══════════════════════════════════════════════════════════════╝

@@ -170,6 +170,7 @@ void exportToCSV();
 void databaseManagementMenu();
 void medicineManagementMenu();
 void addMedicine();
+void viewMedicineStock();
 int getNewMedicineId();
 void saveMedicineData();
 void loadMedicineData();
@@ -3139,6 +3140,119 @@ void addMedicine() {
     printf("Total medicines in inventory: " YELLOW "%d\n" RESET, medicine_count);
 }
 
+// View medicine stock/availability
+void viewMedicineStock() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "        AVAILABLE MEDICINE              \n");
+    printf("========================================\n\n" RESET);
+
+    if(medicine_count == 0) {
+        printf(RED "No medicines in inventory!\n" RESET);
+        return;
+    }
+
+    printf(YELLOW "Total Medicines in Stock: %d\n" RESET, medicine_count);
+    printf(CYAN "\n================================================================================\n" RESET);
+    printf(YELLOW "ID\tMedicine Name\t\t\tCategory\t\tQty\tPrice\tExpiry\n");
+    printf(CYAN "--------------------------------------------------------------------------------\n" RESET);
+
+    int low_stock_count = 0;
+    int expired_count = 0;
+    
+    // Get current date for expiry checking
+    time_t t = time(NULL);
+    struct tm current_time = *localtime(&t);
+    int current_year = current_time.tm_year + 1900;
+    int current_month = current_time.tm_mon + 1;
+    int current_day = current_time.tm_mday;
+
+    for(int i = 0; i < medicine_count; i++) {
+        // Parse expiry date
+        int exp_day, exp_month, exp_year;
+        sscanf(medicines[i].expiry_date, "%d/%d/%d", &exp_day, &exp_month, &exp_year);
+        
+        // Check if expired
+        int is_expired = 0;
+        if(exp_year < current_year) {
+            is_expired = 1;
+        } else if(exp_year == current_year && exp_month < current_month) {
+            is_expired = 1;
+        } else if(exp_year == current_year && exp_month == current_month && exp_day < current_day) {
+            is_expired = 1;
+        }
+        
+        // Check if low stock (less than 50 units)
+        int is_low_stock = (medicines[i].quantity < 50);
+        
+        if(is_low_stock) low_stock_count++;
+        if(is_expired) expired_count++;
+        
+        // Print with color coding
+        if(is_expired) {
+            printf(RED "%d\t" RESET, medicines[i].id);
+        } else if(is_low_stock) {
+            printf(YELLOW "%d\t" RESET, medicines[i].id);
+        } else {
+            printf(GREEN "%d\t" RESET, medicines[i].id);
+        }
+        
+        printf("%-25s\t", medicines[i].name);
+        printf(CYAN "%-15s\t" RESET, medicines[i].category);
+        
+        // Color code quantity
+        if(medicines[i].quantity == 0) {
+            printf(RED "%d\t" RESET, medicines[i].quantity);
+        } else if(is_low_stock) {
+            printf(YELLOW "%d\t" RESET, medicines[i].quantity);
+        } else {
+            printf(GREEN "%d\t" RESET, medicines[i].quantity);
+        }
+        
+        printf(MAGENTA "$%.2f\t" RESET, medicines[i].price);
+        
+        // Color code expiry date
+        if(is_expired) {
+            printf(RED "%s (EXPIRED)" RESET, medicines[i].expiry_date);
+        } else {
+            printf("%s", medicines[i].expiry_date);
+        }
+        
+        printf("\n");
+    }
+
+    printf(CYAN "================================================================================\n" RESET);
+    
+    // Summary section
+    printf(YELLOW "\n=== INVENTORY SUMMARY ===\n" RESET);
+    printf("Total Medicines        : " GREEN "%d\n" RESET, medicine_count);
+    
+    if(low_stock_count > 0) {
+        printf("Low Stock Items        : " YELLOW "%d (< 50 units)\n" RESET, low_stock_count);
+    }
+    
+    if(expired_count > 0) {
+        printf("Expired Items          : " RED "%d\n" RESET, expired_count);
+    }
+    
+    // Calculate total inventory value
+    float total_value = 0;
+    int total_units = 0;
+    for(int i = 0; i < medicine_count; i++) {
+        total_value += medicines[i].price * medicines[i].quantity;
+        total_units += medicines[i].quantity;
+    }
+    
+    printf("Total Units in Stock   : " CYAN "%d\n" RESET, total_units);
+    printf("Total Inventory Value  : " GREEN "$%.2f\n" RESET, total_value);
+    
+    printf(CYAN "\n================================================================================\n" RESET);
+    printf(YELLOW "\nColor Legend:\n" RESET);
+    printf(GREEN "  Green   " RESET "- Good stock (50+ units)\n");
+    printf(YELLOW "  Yellow  " RESET "- Low stock (< 50 units)\n");
+    printf(RED "  Red     " RESET "- Out of stock or Expired\n");
+    printf(CYAN "================================================================================\n" RESET);
+}
+
 // Medicine Management Menu
 void medicineManagementMenu() {
     int choice;
@@ -3149,7 +3263,8 @@ void medicineManagementMenu() {
         printf(BOLD "       MEDICINE & EQUIPMENT            \n");
         printf("========================================\n" RESET);
         printf(GREEN "  1. Add Medicine                      \n" RESET);
-        printf(RED "  2. Back to Main Menu                 \n" RESET);
+        printf(YELLOW "  2. Available Medicine                \n" RESET);
+        printf(RED "  3. Back to Main Menu                 \n" RESET);
         printf(CYAN "========================================\n" RESET);
         printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
@@ -3162,11 +3277,15 @@ void medicineManagementMenu() {
                 pauseScreen();
                 break;
             case 2:
+                viewMedicineStock();
+                pauseScreen();
+                break;
+            case 3:
                 printf(GREEN "Returning to Main Menu...\n" RESET);
                 break;
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 2);
+    } while(choice != 3);
 }

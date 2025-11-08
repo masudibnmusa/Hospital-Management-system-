@@ -55,11 +55,30 @@ int medicine_count = 0;      // Current count of medicines
 - Returns next available ID (starting from 3001)
 - Prevents ID conflicts
 
+#### `viewMedicineStock()` - View available medicines
+**Features:**
+- Displays all medicines in a formatted table
+- Shows: ID, Name, Category, Quantity, Price, Expiry Date
+- Color-coded inventory status:
+  - **Green**: Good stock (50+ units)
+  - **Yellow**: Low stock (< 50 units)
+  - **Red**: Out of stock (0 units) or Expired
+- Automatically checks expiry dates against current date
+- Marks expired medicines with (EXPIRED) tag
+- Displays inventory summary:
+  - Total medicines count
+  - Low stock items count
+  - Expired items count
+  - Total units in stock
+  - Total inventory value
+- Includes color legend for easy interpretation
+
 #### `medicineManagementMenu()` - Medicine menu
 - Access point for medicine operations
 - Currently includes:
   1. Add Medicine
-  2. Back to Main Menu
+  2. Available Medicine (Stock View)
+  3. Back to Main Menu
 
 ### 4. Main Menu Updated
 
@@ -92,6 +111,17 @@ int medicine_count = 0;      // Current count of medicines
    - **Description/usage**: e.g., "For fever and pain relief"
 4. Medicine is added and saved automatically
 5. Unique Medicine ID is assigned
+
+### Viewing Available Medicine
+
+1. From Main Menu, select **"10. Medicine & Equipment"**
+2. Select **"2. Available Medicine"**
+3. View the complete inventory with:
+   - All medicine details in table format
+   - Color-coded stock status
+   - Expiry status warnings
+   - Inventory summary statistics
+   - Total stock value calculation
 
 ## File Structure
 
@@ -169,11 +199,14 @@ gcc hospital.c -o hospital.exe
 
 ## Code Statistics
 
-**Lines Added:** ~145 lines
+**Lines Added:** ~260 lines
 - Structure definition: 9 lines
-- Function prototypes: 5 lines
-- Functions: ~120 lines
-- Menu update: ~11 lines
+- Function prototypes: 6 lines
+- Functions: ~235 lines
+  - addMedicine(): ~60 lines
+  - viewMedicineStock(): ~115 lines
+  - Supporting functions: ~60 lines
+- Menu update: ~10 lines
 
 **Files Modified:**
 - hospital.c (1 file)
