@@ -1,0 +1,160 @@
+╔═══════════════════════════════════════════════════════════════╗
+║         HOSPITAL MANAGEMENT SYSTEM                            ║
+║         DATABASE MANAGEMENT - QUICK REFERENCE                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────┐
+│  HOW TO ACCESS DATABASE MANAGEMENT                            │
+└───────────────────────────────────────────────────────────────┘
+
+1. Run hospital.exe
+2. From Main Menu → Select "10. Admin panel"
+3. Login with:
+   Username: admin
+   Password: admin123
+4. From Admin Panel → Select "4. Database Management"
+
+┌───────────────────────────────────────────────────────────────┐
+│  DATABASE MANAGEMENT MENU OPTIONS                             │
+└───────────────────────────────────────────────────────────────┘
+
+┌──────────┬────────────────────┬─────────────────────────────┐
+│  OPTION  │  FUNCTION          │  DESCRIPTION                │
+├──────────┼────────────────────┼─────────────────────────────┤
+│    1     │  Backup Database   │  Create timestamped backup  │
+│          │                    │  of all data files          │
+│          │                    │  Location: backups/         │
+├──────────┼────────────────────┼─────────────────────────────┤
+│    2     │  Restore Database  │  Restore from previous      │
+│          │                    │  backup. Requires restart.  │
+│          │                    │  ⚠️  Overwrites current data│
+├──────────┼────────────────────┼─────────────────────────────┤
+│    3     │  Export to CSV     │  Export all data to Excel   │
+│          │                    │  compatible CSV files       │
+│          │                    │  Location: exports/         │
+├──────────┼────────────────────┼─────────────────────────────┤
+│    4     │  Delete All Data   │  ⚠️  PERMANENTLY delete all │
+│          │                    │  records and files          │
+│          │                    │  Cannot be undone!          │
+├──────────┼────────────────────┼─────────────────────────────┤
+│    5     │  Back             │  Return to Admin Menu       │
+└──────────┴────────────────────┴─────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────┐
+│  FEATURE DETAILS                                              │
+└───────────────────────────────────────────────────────────────┘
+
+█ BACKUP DATABASE
+  • Creates folder: backups/YYYYMMDD_HHMMSS/
+  • Backs up 5 files:
+    - patients.dat
+    - doctors.dat
+    - appointments.dat
+    - bills.dat
+    - staff.dat
+  • Safe: Never overwrites existing backups
+  • Use before: Making major changes or deletions
+
+█ RESTORE DATABASE
+  • Lists available backups
+  • Enter backup folder name to restore
+  • ⚠️  WARNING: Overwrites all current data
+  • Requires confirmation (y/n)
+  • Must restart application after restore
+  • Use when: Recovering from data loss or errors
+
+█ EXPORT TO CSV/EXCEL
+  • Creates folder: exports/
+  • Generates 5 CSV files with timestamp:
+    - patients_YYYYMMDD_HHMMSS.csv
+    - doctors_YYYYMMDD_HHMMSS.csv
+    - appointments_YYYYMMDD_HHMMSS.csv
+    - bills_YYYYMMDD_HHMMSS.csv
+    - staff_YYYYMMDD_HHMMSS.csv
+  • Open in: Excel, Google Sheets, LibreOffice
+  • Contains column headers
+  • Use for: Reports, analysis, data sharing
+
+█ DELETE ALL DATA
+  • ⚠️  CRITICAL OPERATION - CANNOT BE UNDONE!
+  • Shows record counts for each data type
+  • Requires TWO confirmations (y/n, y/n)
+  • Clears ALL records from memory
+  • Deletes ALL .dat files
+  • Use for: Fresh start, testing, maintenance
+  • ⚠️  ALWAYS BACKUP FIRST!
+
+┌───────────────────────────────────────────────────────────────┐
+│  IMPORTANT WARNINGS                                           │
+└───────────────────────────────────────────────────────────────┘
+
+⚠️  RESTORE DATABASE - Overwrites current data
+   → Solution: Create backup before restoring
+
+⚠️  DELETE ALL DATA - Permanent deletion
+   → Solution: Create backup before deleting
+
+⚠️  AFTER RESTORE - Data not loaded immediately
+   → Solution: Restart the application
+
+┌───────────────────────────────────────────────────────────────┐
+│  DIRECTORY STRUCTURE                                          │
+└───────────────────────────────────────────────────────────────┘
+
+Hospital Management System/
+├── hospital.exe              (Main program)
+├── *.dat                     (Database files)
+├── backups/                  (Backup directory)
+│   ├── 20250108_105530/      (Backup folder - timestamp)
+│   │   ├── patients.dat
+│   │   ├── doctors.dat
+│   │   ├── appointments.dat
+│   │   ├── bills.dat
+│   │   └── staff.dat
+│   └── 20250108_110245/      (Another backup)
+│       └── ...
+└── exports/                  (CSV export directory)
+    ├── patients_20250108_105530.csv
+    ├── doctors_20250108_105530.csv
+    ├── appointments_20250108_105530.csv
+    ├── bills_20250108_105530.csv
+    └── staff_20250108_105530.csv
+
+┌───────────────────────────────────────────────────────────────┐
+│  BEST PRACTICES                                               │
+└───────────────────────────────────────────────────────────────┘
+
+✓ Backup regularly (daily, weekly, or before major changes)
+✓ Keep multiple backups (don't delete old ones immediately)
+✓ Test restore procedure occasionally
+✓ Export to CSV for reporting and analysis
+✓ Never delete all data without a backup
+✓ Document your backup schedule
+✓ Store important backups in safe location (external drive/cloud)
+
+┌───────────────────────────────────────────────────────────────┐
+│  TROUBLESHOOTING                                              │
+└───────────────────────────────────────────────────────────────┘
+
+Q: Restored data doesn't appear?
+A: You must restart the application after restore.
+
+Q: Can't find backup folder?
+A: Check the backups/ directory. Folders are named with timestamps
+   in format: YYYYMMDD_HHMMSS (e.g., 20250108_105530)
+
+Q: CSV files won't open in Excel?
+A: CSV files are in the exports/ directory. If Excel shows garbled
+   text, try: Excel → Data → From Text/CSV → Import
+
+Q: Accidentally deleted all data?
+A: If you created a backup, use "Restore Database" option.
+   If no backup exists, data cannot be recovered.
+
+Q: Export shows "No data to export"?
+A: The database is empty. Add some records first.
+
+╔═══════════════════════════════════════════════════════════════╗
+║  For detailed technical documentation, see:                   ║
+║  DATABASE_MANAGEMENT_FEATURE.md                               ║
+╚═══════════════════════════════════════════════════════════════╝

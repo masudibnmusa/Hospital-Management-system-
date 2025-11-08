@@ -49,7 +49,9 @@ Admin Panel
   └── 4. Database Management
        ├── 1. Backup Database (existing backupData() function)
        ├── 2. Restore Database (new restoreData() function)
-       └── 3. Back to Admin Menu
+       ├── 3. Export to CSV/Excel (new exportToCSV() function)
+       ├── 4. Delete All Data (new deleteAllData() function)
+       └── 5. Back to Admin Menu
 ```
 
 ## How to Use
@@ -82,7 +84,76 @@ The program compiles successfully with no errors or warnings:
 gcc hospital.c -o hospital.exe
 ```
 
+### Exporting to CSV/Excel
+1. Login to Admin Panel
+2. Select option 4: Database Management
+3. Select option 3: Export to CSV/Excel
+4. Data will be exported to `exports/` directory with timestamped filenames
+5. Open CSV files in Excel, Google Sheets, or any spreadsheet application
+
+### Deleting All Data
+1. Login to Admin Panel
+2. Select option 4: Database Management
+3. Select option 4: Delete All Data
+4. Read the warning carefully - it shows how many records will be deleted
+5. Confirm TWICE (y/n) to proceed with deletion
+6. All data files and memory will be cleared
+
+## Detailed Function Descriptions
+
+### 3. `exportToCSV()` Function
+**Purpose**: Export all database records to CSV files for Excel/spreadsheet analysis
+
+**Features**:
+- Creates timestamped CSV files in `exports/` directory
+- Exports 5 separate files:
+  - `patients_YYYYMMDD_HHMMSS.csv` - Patient records
+  - `doctors_YYYYMMDD_HHMMSS.csv` - Doctor records
+  - `appointments_YYYYMMDD_HHMMSS.csv` - Appointment records
+  - `bills_YYYYMMDD_HHMMSS.csv` - Billing records
+  - `staff_YYYYMMDD_HHMMSS.csv` - Staff records
+- Includes column headers for easy reading
+- Properly quotes text fields to handle commas in data
+- Skips empty datasets (no records to export)
+- Shows progress and count of exported records
+
+**Use Cases**:
+- Data analysis in Excel/Google Sheets
+- Creating reports and presentations
+- Sharing data with other systems
+- Archiving data in readable format
+- Importing into other database systems
+
+### 4. `deleteAllData()` Function
+**Purpose**: Permanently delete all database records and files
+
+**Features**:
+- Shows detailed warning with record counts for each data type
+- Requires TWO confirmations to prevent accidental deletion
+- Clears all memory arrays (resets counts to 0)
+- Deletes all .dat files from disk
+- Provides feedback on deletion progress
+- Cannot be undone (emphasizes backup importance)
+
+**Safety Measures**:
+- Double confirmation required (y/n twice)
+- Shows exact number of records that will be deleted
+- Warns user to create backup first
+- Clear visual warnings with RED text
+- Displays success/failure for each file deletion
+
+**Use Cases**:
+- Starting fresh with new data
+- Testing the system
+- Removing demo/test data
+- System maintenance
+- Privacy compliance (data deletion requests)
+
 ## Notes
 - Backups are stored in the `backups/` directory with timestamp subdirectories
 - After restoring, you must restart the application to load the restored data
 - The restore function uses cross-platform directory listing (Windows/Linux)
+- CSV exports are saved in the `exports/` directory
+- All exported CSV files are compatible with Microsoft Excel, Google Sheets, LibreOffice Calc
+- Delete All Data cannot be undone - always backup before using this feature
+- Timestamps in filenames use format: YYYYMMDD_HHMMSS (e.g., 20250108_110530)

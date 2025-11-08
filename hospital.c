@@ -151,6 +151,8 @@ int validateDate(const char *date);
 int validateTime12(const char *time_str);
 void backupData();
 void restoreData();
+void deleteAllData();
+void exportToCSV();
 void databaseManagementMenu();
 
 // Utility function to safely clear input buffer
@@ -2497,6 +2499,229 @@ void restoreData() {
     printf(CYAN "========================================\n" RESET);
 }
 
+// Delete all data from database
+void deleteAllData() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "          DELETE ALL DATA              \n");
+    printf("========================================\n" RESET);
+    
+    printf(RED "\n*** CRITICAL WARNING ***\n" RESET);
+    printf(YELLOW "This will permanently delete ALL data:\n");
+    printf("  - All Patients (%d records)\n", patient_count);
+    printf("  - All Doctors (%d records)\n", doctor_count);
+    printf("  - All Appointments (%d records)\n", appointment_count);
+    printf("  - All Bills (%d records)\n", bill_count);
+    printf("  - All Staff (%d records)\n" RESET, staff_count);
+    
+    printf(RED "\nThis action CANNOT be undone!\n" RESET);
+    printf(YELLOW "Make sure you have a backup before proceeding.\n" RESET);
+    
+    // First confirmation
+    printf(BLUE "\nDo you want to continue? (y/n): " RESET);
+    char confirm1;
+    scanf(" %c", &confirm1);
+    
+    if (confirm1 != 'y' && confirm1 != 'Y') {
+        printf(GREEN "\nOperation cancelled. No data was deleted.\n" RESET);
+        return;
+    }
+    
+    // Second confirmation
+    printf(RED "\nARE YOU ABSOLUTELY SURE? (y/n): " RESET);
+    char confirm2;
+    scanf(" %c", &confirm2);
+    
+    if (confirm2 != 'y' && confirm2 != 'Y') {
+        printf(GREEN "\nOperation cancelled. No data was deleted.\n" RESET);
+        return;
+    }
+    
+    // Delete all data
+    printf(YELLOW "\nDeleting all data...\n" RESET);
+    
+    // Clear memory arrays
+    patient_count = 0;
+    doctor_count = 0;
+    appointment_count = 0;
+    bill_count = 0;
+    staff_count = 0;
+    
+    // Save empty data to files
+    saveData();
+    
+    // Delete data files
+    const char *files[] = {"patients.dat", "doctors.dat", "appointments.dat", "bills.dat", "staff.dat"};
+    int deleted = 0;
+    
+    for (int i = 0; i < (int)(sizeof(files)/sizeof(files[0])); i++) {
+        if (remove(files[i]) == 0) {
+            printf(GREEN "Deleted: %s\n" RESET, files[i]);
+            deleted++;
+        } else {
+            printf(YELLOW "Could not delete: %s (may not exist)\n" RESET, files[i]);
+        }
+    }
+    
+    printf(CYAN "\n========================================\n" RESET);
+    printf(GREEN "Database cleared successfully!\n" RESET);
+    printf("Files deleted: " YELLOW "%d\n" RESET, deleted);
+    printf("All data has been permanently removed.\n");
+    printf(CYAN "========================================\n" RESET);
+}
+
+// Export data to CSV files
+void exportToCSV() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "          EXPORT TO CSV/EXCEL          \n");
+    printf("========================================\n" RESET);
+    
+    // Create exports directory
+    if (!ensure_dir("exports")) {
+        printf(YELLOW "Note: 'exports' directory will be created.\n" RESET);
+        ensure_dir("exports");
+    }
+    
+    // Get timestamp for filenames
+    time_t t = time(NULL);
+    struct tm tmv = *localtime(&t);
+    char ts[32];
+    sprintf(ts, "%04d%02d%02d_%02d%02d%02d", tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday,
+            tmv.tm_hour, tmv.tm_min, tmv.tm_sec);
+    
+    int total_exported = 0;
+    
+    printf(YELLOW "\nExporting data to CSV files...\n" RESET);
+    printf(CYAN "----------------------------------------\n" RESET);
+    
+    // Export Patients
+    if (patient_count > 0) {
+        char filename[150];
+        sprintf(filename, "exports/patients_%s.csv", ts);
+        FILE *fp = fopen(filename, "w");
+        if (fp) {
+            fprintf(fp, "ID,Name,Age,Gender,Contact,Address,Medical History\n");
+            for (int i = 0; i < patient_count; i++) {
+                fprintf(fp, "%d,\"%s\",%d,\"%s\",\"%s\",\"%s\",\"%s\"\n",
+                    patients[i].id, patients[i].name, patients[i].age,
+                    patients[i].gender, patients[i].contact,
+                    patients[i].address, patients[i].medical_history);
+            }
+            fclose(fp);
+            printf(GREEN "Exported: %s (%d records)\n" RESET, filename, patient_count);
+            total_exported++;
+        } else {
+            printf(RED "Failed to export: patients.csv\n" RESET);
+        }
+    } else {
+        printf(YELLOW "Skipped: No patients to export\n" RESET);
+    }
+    
+    // Export Doctors
+    if (doctor_count > 0) {
+        char filename[150];
+        sprintf(filename, "exports/doctors_%s.csv", ts);
+        FILE *fp = fopen(filename, "w");
+        if (fp) {
+            fprintf(fp, "ID,Name,Specialization,Contact,Availability\n");
+            for (int i = 0; i < doctor_count; i++) {
+                fprintf(fp, "%d,\"%s\",\"%s\",\"%s\",\"%s\"\n",
+                    doctors[i].id, doctors[i].name, doctors[i].specialization,
+                    doctors[i].contact, doctors[i].availability);
+            }
+            fclose(fp);
+            printf(GREEN "Exported: %s (%d records)\n" RESET, filename, doctor_count);
+            total_exported++;
+        } else {
+            printf(RED "Failed to export: doctors.csv\n" RESET);
+        }
+    } else {
+        printf(YELLOW "Skipped: No doctors to export\n" RESET);
+    }
+    
+    // Export Appointments
+    if (appointment_count > 0) {
+        char filename[150];
+        sprintf(filename, "exports/appointments_%s.csv", ts);
+        FILE *fp = fopen(filename, "w");
+        if (fp) {
+            fprintf(fp, "ID,Patient ID,Doctor ID,Date,Time,Purpose,Status\n");
+            for (int i = 0; i < appointment_count; i++) {
+                fprintf(fp, "%d,%d,%d,\"%s\",\"%s\",\"%s\",\"%s\"\n",
+                    appointments[i].id, appointments[i].patient_id, appointments[i].doctor_id,
+                    appointments[i].date, appointments[i].time,
+                    appointments[i].purpose, appointments[i].status);
+            }
+            fclose(fp);
+            printf(GREEN "Exported: %s (%d records)\n" RESET, filename, appointment_count);
+            total_exported++;
+        } else {
+            printf(RED "Failed to export: appointments.csv\n" RESET);
+        }
+    } else {
+        printf(YELLOW "Skipped: No appointments to export\n" RESET);
+    }
+    
+    // Export Bills
+    if (bill_count > 0) {
+        char filename[150];
+        sprintf(filename, "exports/bills_%s.csv", ts);
+        FILE *fp = fopen(filename, "w");
+        if (fp) {
+            fprintf(fp, "Bill No,Patient ID,Consultation Fee,Medicine Charges,Room Charges,Lab Charges,Total Amount,Date,Status\n");
+            for (int i = 0; i < bill_count; i++) {
+                fprintf(fp, "%d,%d,%.2f,%.2f,%.2f,%.2f,%.2f,\"%s\",\"%s\"\n",
+                    bills[i].bill_no, bills[i].patient_id,
+                    bills[i].consultation_fee, bills[i].medicine_charges,
+                    bills[i].room_charges, bills[i].lab_charges,
+                    bills[i].total_amount, bills[i].date, bills[i].status);
+            }
+            fclose(fp);
+            printf(GREEN "Exported: %s (%d records)\n" RESET, filename, bill_count);
+            total_exported++;
+        } else {
+            printf(RED "Failed to export: bills.csv\n" RESET);
+        }
+    } else {
+        printf(YELLOW "Skipped: No bills to export\n" RESET);
+    }
+    
+    // Export Staff
+    if (staff_count > 0) {
+        char filename[150];
+        sprintf(filename, "exports/staff_%s.csv", ts);
+        FILE *fp = fopen(filename, "w");
+        if (fp) {
+            fprintf(fp, "ID,Name,Role,Department,Contact,Email,Address,Qualification,Salary,Join Date,Shift,Status\n");
+            for (int i = 0; i < staff_count; i++) {
+                fprintf(fp, "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                    staff[i].id, staff[i].name, staff[i].role, staff[i].department,
+                    staff[i].contact, staff[i].email, staff[i].address,
+                    staff[i].qualification, staff[i].salary, staff[i].join_date,
+                    staff[i].shift, staff[i].status);
+            }
+            fclose(fp);
+            printf(GREEN "Exported: %s (%d records)\n" RESET, filename, staff_count);
+            total_exported++;
+        } else {
+            printf(RED "Failed to export: staff.csv\n" RESET);
+        }
+    } else {
+        printf(YELLOW "Skipped: No staff to export\n" RESET);
+    }
+    
+    printf(CYAN "----------------------------------------\n" RESET);
+    printf("Total files exported: " GREEN "%d\n" RESET, total_exported);
+    
+    if (total_exported > 0) {
+        printf(GREEN "\nExport completed successfully!\n" RESET);
+        printf(YELLOW "Files saved in 'exports/' directory.\n");
+        printf("You can open these files in Excel or any spreadsheet application.\n" RESET);
+    } else {
+        printf(YELLOW "\nNo data available to export.\n" RESET);
+    }
+    printf(CYAN "========================================\n" RESET);
+}
+
 // Database Management Menu
 void databaseManagementMenu() {
     int choice;
@@ -2508,7 +2733,9 @@ void databaseManagementMenu() {
         printf("========================================\n" RESET);
         printf(GREEN "  1. Backup Database                   \n" RESET);
         printf(YELLOW "  2. Restore Database                  \n" RESET);
-        printf(RED "  3. Back to Admin Menu                \n" RESET);
+        printf(MAGENTA "  3. Export to CSV/Excel               \n" RESET);
+        printf(RED "  4. Delete All Data                   \n" RESET);
+        printf(CYAN "  5. Back to Admin Menu                \n" RESET);
         printf(CYAN "========================================\n" RESET);
         printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
@@ -2525,13 +2752,21 @@ void databaseManagementMenu() {
                 pauseScreen();
                 break;
             case 3:
+                exportToCSV();
+                pauseScreen();
+                break;
+            case 4:
+                deleteAllData();
+                pauseScreen();
+                break;
+            case 5:
                 printf(GREEN "Returning to Admin Menu...\n" RESET);
                 break;
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 3);
+    } while(choice != 5);
 }
 
 // Yearly statistics
