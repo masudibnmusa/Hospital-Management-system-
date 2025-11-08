@@ -1,0 +1,326 @@
+╔═══════════════════════════════════════════════════════════════╗
+║            UPDATE STOCK FEATURE - SUMMARY                     ║
+╚═══════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────┐
+│  FEATURE OVERVIEW                                             │
+└───────────────────────────────────────────────────────────────┘
+
+The Update Stock feature allows you to modify medicine quantities
+in the inventory with three different update methods:
+  • Add Stock (for new shipments/restocking)
+  • Reduce Stock (for medicine used/sold)
+  • Set New Stock (direct quantity update)
+
+┌───────────────────────────────────────────────────────────────┐
+│  HOW TO ACCESS                                                │
+└───────────────────────────────────────────────────────────────┘
+
+Main Menu → 10. Medicine & Equipment → 3. Update Stock
+
+┌───────────────────────────────────────────────────────────────┐
+│  UPDATE OPTIONS                                               │
+└───────────────────────────────────────────────────────────────┘
+
+█ OPTION 1: ADD STOCK (Receive new shipment)
+  Use when: Restocking, receiving new orders
+  Action: Increases current quantity by specified amount
+  Formula: New Quantity = Current + Added
+  Example: Current: 50 → Add 100 → New: 150
+
+█ OPTION 2: REDUCE STOCK (Medicine used/sold)
+  Use when: Medicine dispensed, sold, or used
+  Action: Decreases current quantity by specified amount
+  Formula: New Quantity = Current - Reduced
+  Validation: Cannot reduce more than available
+  Example: Current: 150 → Reduce 30 → New: 120
+  Warning: Shows alert if stock becomes low or empty
+
+█ OPTION 3: SET NEW STOCK (Direct update)
+  Use when: Doing inventory count, correcting errors
+  Action: Sets quantity to exact specified value
+  Formula: New Quantity = Specified Amount
+  Example: Current: 120 → Set to 75 → New: 75
+  
+█ OPTION 4: CANCEL
+  Action: Exit without making changes
+
+┌───────────────────────────────────────────────────────────────┐
+│  STEP-BY-STEP USAGE                                           │
+└───────────────────────────────────────────────────────────────┘
+
+Step 1: View Current Stock List
+  → System displays all medicines with color-coded quantities
+  → Green: Good stock (50+)
+  → Yellow: Low stock (<50)
+  → Red: Out of stock (0)
+
+Step 2: Enter Medicine ID
+  → Input the ID of medicine you want to update
+  → System validates the ID exists
+
+Step 3: View Medicine Details
+  → System shows current details of selected medicine
+  → ID, Name, Category, Current Stock, Price
+
+Step 4: Choose Update Method
+  → Select from 4 options (Add/Reduce/Set/Cancel)
+
+Step 5: Enter Quantity
+  → Input the quantity for your chosen method
+  → System validates the input
+
+Step 6: Confirm Update
+  → System shows before/after comparison
+  → Displays warnings if applicable
+  → Calculates new medicine value
+  → Auto-saves changes
+
+┌───────────────────────────────────────────────────────────────┐
+│  EXAMPLE SCENARIOS                                            │
+└───────────────────────────────────────────────────────────────┘
+
+SCENARIO 1: NEW SHIPMENT ARRIVED
+────────────────────────────────────────────────────────────────
+Medicine: Paracetamol 500mg
+Current Stock: 30 units (LOW STOCK - Yellow)
+Action: Option 1 - Add Stock
+Quantity: +200 units
+Result: 230 units (GOOD STOCK - Green)
+Message: ✓ Stock added successfully!
+
+SCENARIO 2: MEDICINE DISPENSED TO PATIENT
+────────────────────────────────────────────────────────────────
+Medicine: Amoxicillin 250mg
+Current Stock: 100 units
+Action: Option 2 - Reduce Stock
+Quantity: -15 units
+Result: 85 units
+Message: ✓ Stock reduced successfully!
+
+SCENARIO 3: INVENTORY COUNT CORRECTION
+────────────────────────────────────────────────────────────────
+Medicine: Aspirin 75mg
+Current Stock: 500 units (recorded)
+Actual Count: 480 units (physical count)
+Action: Option 3 - Set New Stock
+Quantity: 480 units
+Result: 480 units
+Message: ✓ Stock updated successfully!
+
+SCENARIO 4: MEDICINE FULLY USED
+────────────────────────────────────────────────────────────────
+Medicine: Insulin Injection
+Current Stock: 25 units
+Action: Option 2 - Reduce Stock
+Quantity: -25 units
+Result: 0 units (OUT OF STOCK - Red)
+Message: ✓ Stock reduced successfully!
+         ⚠ WARNING: Medicine is now OUT OF STOCK!
+
+┌───────────────────────────────────────────────────────────────┐
+│  SAFETY FEATURES & VALIDATIONS                                │
+└───────────────────────────────────────────────────────────────┘
+
+✓ MEDICINE ID VALIDATION
+  → Verifies medicine exists before update
+  → Shows error if ID not found
+
+✓ QUANTITY VALIDATION
+  → Prevents negative quantities in Add/Reduce options
+  → Ensures non-negative in Set option
+  → Shows clear error messages
+
+✓ STOCK AVAILABILITY CHECK
+  → Cannot reduce more than available
+  → Prevents negative stock levels
+  → Shows current vs. requested quantity
+
+✓ LOW STOCK WARNINGS
+  → Alerts when stock falls below 50 units
+  → Visual warning with yellow color
+
+✓ OUT OF STOCK ALERTS
+  → Critical warning when stock reaches 0
+  → Visual alert with red color
+
+✓ AUTO-SAVE
+  → Changes saved immediately after confirmation
+  → No risk of data loss
+
+✓ VALUE CALCULATION
+  → Shows total value of medicine after update
+  → Helps track inventory worth
+
+┌───────────────────────────────────────────────────────────────┐
+│  DISPLAY OUTPUT EXAMPLE                                       │
+└───────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════
+           UPDATE MEDICINE STOCK        
+════════════════════════════════════════════════════════════════
+
+Current Medicine Stock:
+
+ID   Medicine Name            Category        Quantity
+────────────────────────────────────────────────────────────────
+3001 Paracetamol 500mg       Tablet          30 (YELLOW)
+3002 Amoxicillin 250mg       Capsule         100 (GREEN)
+3003 Aspirin 75mg            Tablet          500 (GREEN)
+════════════════════════════════════════════════════════════════
+
+Enter Medicine ID to update stock: 3001
+
+════════════════════════════════════════════════════════════════
+        UPDATE STOCK - MEDICINE         
+════════════════════════════════════════════════════════════════
+Medicine ID    : 3001
+Name           : Paracetamol 500mg
+Category       : Tablet
+Current Stock  : 30 units
+Price per Unit : $2.50
+════════════════════════════════════════════════════════════════
+
+Update Options:
+1. Add Stock (Receive new shipment)
+2. Reduce Stock (Medicine used/sold)
+3. Set New Stock (Direct update)
+4. Cancel
+
+Enter your choice: 1
+
+Enter quantity to add: 200
+
+✓ Stock added successfully!
+Previous Stock: 30 units
+Added         : +200 units
+New Stock     : 230 units
+
+════════════════════════════════════════════════════════════════
+Medicine Value : $575.00
+════════════════════════════════════════════════════════════════
+
+┌───────────────────────────────────────────────────────────────┐
+│  TECHNICAL DETAILS                                            │
+└───────────────────────────────────────────────────────────────┘
+
+Function: updateStock()
+Lines of Code: ~170 lines
+Dependencies:
+  - Medicine array
+  - medicine_count variable
+  - saveMedicineData() function
+  - Color codes
+
+Algorithm:
+1. Display current stock list with color coding
+2. Prompt for medicine ID
+3. Search and validate medicine exists
+4. Display medicine details
+5. Show update options menu
+6. Get user's update choice
+7. Process update based on choice:
+   - Add: Increment quantity
+   - Reduce: Decrement with validation
+   - Set: Replace quantity
+   - Cancel: Exit without changes
+8. Display before/after comparison
+9. Show warnings if needed
+10. Save changes to file
+11. Calculate and display medicine value
+
+┌───────────────────────────────────────────────────────────────┐
+│  ERROR HANDLING                                               │
+└───────────────────────────────────────────────────────────────┘
+
+ERROR: Empty Inventory
+  Message: "No medicines in inventory!"
+  Action: Return to menu
+
+ERROR: Invalid Medicine ID
+  Message: "Medicine with ID [X] not found!"
+  Action: Return to menu
+
+ERROR: Negative Quantity (Add/Reduce)
+  Message: "Invalid quantity! Must be positive."
+  Action: Cancel update, return to menu
+
+ERROR: Insufficient Stock (Reduce)
+  Message: "Cannot reduce by [X] units. Only [Y] units available!"
+  Action: Cancel update, return to menu
+
+ERROR: Negative Quantity (Set)
+  Message: "Invalid quantity! Must be non-negative."
+  Action: Cancel update, return to menu
+
+ERROR: Invalid Update Choice
+  Message: "Invalid choice! No changes made."
+  Action: Return to menu
+
+┌───────────────────────────────────────────────────────────────┐
+│  USE CASES                                                    │
+└───────────────────────────────────────────────────────────────┘
+
+1. Daily Operations
+   → Update stock as medicines are dispensed
+   → Track usage in real-time
+
+2. Receiving Shipments
+   → Add new stock when orders arrive
+   → Update inventory immediately
+
+3. Inventory Audits
+   → Set exact counts from physical verification
+   → Correct any discrepancies
+
+4. Emergency Situations
+   → Quickly adjust stock for urgent cases
+   → Real-time availability updates
+
+5. End of Day Reconciliation
+   → Match system records with actual count
+   → Prepare accurate reports
+
+┌───────────────────────────────────────────────────────────────┐
+│  BENEFITS                                                     │
+└───────────────────────────────────────────────────────────────┘
+
+✓ ACCURACY
+  → Real-time stock tracking
+  → Prevents inventory errors
+
+✓ FLEXIBILITY
+  → Multiple update methods
+  → Suitable for different scenarios
+
+✓ SAFETY
+  → Validation prevents mistakes
+  → Cannot create negative stock
+
+✓ VISIBILITY
+  → Color-coded status
+  → Instant warnings
+
+✓ EFFICIENCY
+  → Quick updates
+  → Auto-save feature
+
+✓ ACCOUNTABILITY
+  → Shows before/after values
+  → Track changes clearly
+
+┌───────────────────────────────────────────────────────────────┐
+│  COMPILATION STATUS                                           │
+└───────────────────────────────────────────────────────────────┘
+
+✓ Compilation: SUCCESS
+✓ Warnings: NONE
+✓ Errors: NONE
+
+Command: gcc hospital.c -o hospital.exe
+
+╔═══════════════════════════════════════════════════════════════╗
+║  The Update Stock feature provides flexible and safe          ║
+║  inventory management with comprehensive validation           ║
+║  and real-time feedback for hospital operations.              ║
+╚═══════════════════════════════════════════════════════════════╝

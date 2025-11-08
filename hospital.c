@@ -171,6 +171,7 @@ void databaseManagementMenu();
 void medicineManagementMenu();
 void addMedicine();
 void viewMedicineStock();
+void updateStock();
 int getNewMedicineId();
 void saveMedicineData();
 void loadMedicineData();
@@ -3253,6 +3254,178 @@ void viewMedicineStock() {
     printf(CYAN "================================================================================\n" RESET);
 }
 
+// Update medicine stock quantities
+void updateStock() {
+    printf(CYAN "========================================\n");
+    printf(BOLD "           UPDATE MEDICINE STOCK        \n");
+    printf("========================================\n\n" RESET);
+
+    if(medicine_count == 0) {
+        printf(RED "No medicines in inventory!\n" RESET);
+        return;
+    }
+
+    // Display current stock
+    printf(YELLOW "Current Medicine Stock:\n" RESET);
+    printf(CYAN "================================================================================\n" RESET);
+    printf(YELLOW "ID\tMedicine Name\t\t\tCategory\t\tQuantity\n");
+    printf(CYAN "--------------------------------------------------------------------------------\n" RESET);
+
+    for(int i = 0; i < medicine_count; i++) {
+        // Color code based on stock level
+        if(medicines[i].quantity == 0) {
+            printf(RED "%d\t" RESET, medicines[i].id);
+        } else if(medicines[i].quantity < 50) {
+            printf(YELLOW "%d\t" RESET, medicines[i].id);
+        } else {
+            printf(GREEN "%d\t" RESET, medicines[i].id);
+        }
+        
+        printf("%-25s\t", medicines[i].name);
+        printf(CYAN "%-15s\t" RESET, medicines[i].category);
+        
+        if(medicines[i].quantity == 0) {
+            printf(RED "%d\n" RESET, medicines[i].quantity);
+        } else if(medicines[i].quantity < 50) {
+            printf(YELLOW "%d\n" RESET, medicines[i].quantity);
+        } else {
+            printf(GREEN "%d\n" RESET, medicines[i].quantity);
+        }
+    }
+
+    printf(CYAN "================================================================================\n" RESET);
+
+    // Get medicine ID to update
+    int medicine_id;
+    printf(BLUE "\nEnter Medicine ID to update stock: " RESET);
+    scanf("%d", &medicine_id);
+
+    // Find medicine
+    int found = -1;
+    for(int i = 0; i < medicine_count; i++) {
+        if(medicines[i].id == medicine_id) {
+            found = i;
+            break;
+        }
+    }
+
+    if(found == -1) {
+        printf(RED "\nMedicine with ID %d not found!\n" RESET, medicine_id);
+        return;
+    }
+
+    // Display current medicine details
+    clearScreen();
+    printf(CYAN "========================================\n");
+    printf(BOLD "        UPDATE STOCK - MEDICINE         \n");
+    printf("========================================\n" RESET);
+    printf("Medicine ID    : " YELLOW "%d\n" RESET, medicines[found].id);
+    printf("Name           : " YELLOW "%s\n" RESET, medicines[found].name);
+    printf("Category       : " YELLOW "%s\n" RESET, medicines[found].category);
+    printf("Current Stock  : " YELLOW "%d units\n" RESET, medicines[found].quantity);
+    printf("Price per Unit : " YELLOW "$%.2f\n" RESET, medicines[found].price);
+    printf(CYAN "========================================\n" RESET);
+
+    // Update options
+    printf(YELLOW "\nUpdate Options:\n" RESET);
+    printf(GREEN "1. Add Stock (Receive new shipment)\n" RESET);
+    printf(RED "2. Reduce Stock (Medicine used/sold)\n" RESET);
+    printf(MAGENTA "3. Set New Stock (Direct update)\n" RESET);
+    printf(BLUE "4. Cancel\n" RESET);
+    
+    int update_choice;
+    printf(BLUE "\nEnter your choice: " RESET);
+    scanf("%d", &update_choice);
+
+    int quantity_change;
+    int old_quantity = medicines[found].quantity;
+
+    switch(update_choice) {
+        case 1: // Add stock
+            printf(BLUE "\nEnter quantity to add: " RESET);
+            scanf("%d", &quantity_change);
+            
+            if(quantity_change < 0) {
+                printf(RED "\nInvalid quantity! Must be positive.\n" RESET);
+                return;
+            }
+            
+            medicines[found].quantity += quantity_change;
+            printf(GREEN "\n✓ Stock added successfully!\n" RESET);
+            printf("Previous Stock: " YELLOW "%d units\n" RESET, old_quantity);
+            printf("Added         : " GREEN "+%d units\n" RESET, quantity_change);
+            printf("New Stock     : " GREEN "%d units\n" RESET, medicines[found].quantity);
+            break;
+
+        case 2: // Reduce stock
+            printf(BLUE "\nEnter quantity to reduce: " RESET);
+            scanf("%d", &quantity_change);
+            
+            if(quantity_change < 0) {
+                printf(RED "\nInvalid quantity! Must be positive.\n" RESET);
+                return;
+            }
+            
+            if(quantity_change > medicines[found].quantity) {
+                printf(RED "\nError: Cannot reduce by %d units. Only %d units available!\n" RESET,
+                       quantity_change, medicines[found].quantity);
+                return;
+            }
+            
+            medicines[found].quantity -= quantity_change;
+            printf(YELLOW "\n✓ Stock reduced successfully!\n" RESET);
+            printf("Previous Stock: " YELLOW "%d units\n" RESET, old_quantity);
+            printf("Reduced       : " RED "-%d units\n" RESET, quantity_change);
+            printf("New Stock     : " YELLOW "%d units\n" RESET, medicines[found].quantity);
+            
+            if(medicines[found].quantity == 0) {
+                printf(RED "\n⚠ WARNING: Medicine is now OUT OF STOCK!\n" RESET);
+            } else if(medicines[found].quantity < 50) {
+                printf(YELLOW "\n⚠ WARNING: Low stock level (< 50 units)\n" RESET);
+            }
+            break;
+
+        case 3: // Set new stock
+            printf(BLUE "\nEnter new stock quantity: " RESET);
+            scanf("%d", &quantity_change);
+            
+            if(quantity_change < 0) {
+                printf(RED "\nInvalid quantity! Must be non-negative.\n" RESET);
+                return;
+            }
+            
+            medicines[found].quantity = quantity_change;
+            printf(MAGENTA "\n✓ Stock updated successfully!\n" RESET);
+            printf("Previous Stock: " YELLOW "%d units\n" RESET, old_quantity);
+            printf("New Stock     : " MAGENTA "%d units\n" RESET, medicines[found].quantity);
+            
+            if(medicines[found].quantity == 0) {
+                printf(RED "\n⚠ WARNING: Medicine is now OUT OF STOCK!\n" RESET);
+            } else if(medicines[found].quantity < 50) {
+                printf(YELLOW "\n⚠ WARNING: Low stock level (< 50 units)\n" RESET);
+            }
+            break;
+
+        case 4: // Cancel
+            printf(YELLOW "\nUpdate cancelled. No changes made.\n" RESET);
+            return;
+
+        default:
+            printf(RED "\nInvalid choice! No changes made.\n" RESET);
+            return;
+    }
+
+    // Save updated data
+    saveMedicineData();
+    
+    // Calculate new total value for this medicine
+    float medicine_value = medicines[found].price * medicines[found].quantity;
+    
+    printf(CYAN "\n========================================\n" RESET);
+    printf("Medicine Value : " GREEN "$%.2f\n" RESET, medicine_value);
+    printf(CYAN "========================================\n" RESET);
+}
+
 // Medicine Management Menu
 void medicineManagementMenu() {
     int choice;
@@ -3264,7 +3437,8 @@ void medicineManagementMenu() {
         printf("========================================\n" RESET);
         printf(GREEN "  1. Add Medicine                      \n" RESET);
         printf(YELLOW "  2. Available Medicine                \n" RESET);
-        printf(RED "  3. Back to Main Menu                 \n" RESET);
+        printf(MAGENTA "  3. Update Stock                      \n" RESET);
+        printf(RED "  4. Back to Main Menu                 \n" RESET);
         printf(CYAN "========================================\n" RESET);
         printf(BLUE "Enter your choice: " RESET);
         scanf("%d", &choice);
@@ -3281,11 +3455,15 @@ void medicineManagementMenu() {
                 pauseScreen();
                 break;
             case 3:
+                updateStock();
+                pauseScreen();
+                break;
+            case 4:
                 printf(GREEN "Returning to Main Menu...\n" RESET);
                 break;
             default:
                 printf(RED "Invalid choice! Please try again.\n" RESET);
                 pauseScreen();
         }
-    } while(choice != 3);
+    } while(choice != 4);
 }
