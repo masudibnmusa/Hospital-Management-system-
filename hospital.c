@@ -161,17 +161,16 @@ void clearScreen() {
 // Utility function to pause screen
 void pauseScreen() {
     printf("\nPress Enter to continue...");
-    
-    // Clear any pending input first
-    clearInputBuffer();
-    
-    // Wait for Enter key
-    int c = getchar();
-    
-    // Handle EOF or error conditions
-    if (c == EOF) {
-        clearerr(stdin);
-    }
+
+    // Read until newline or EOF (consumes leftover newline if present, or waits for one)
+    int c;
+    do {
+        c = getchar();
+        if (c == EOF) {
+            clearerr(stdin);
+            break;
+        }
+    } while (c != '\n');
 }
 
 int main() {
@@ -504,10 +503,10 @@ void addPatient() {
     scanf("%d", &p.age);
 
     printf(BLUE "Enter gender: " RESET);
-    scanf("%s", p.gender);
+    scanf("%9s", p.gender);
 
     printf(BLUE "Enter contact number: " RESET);
-    scanf("%s", p.contact);
+    scanf("%14s", p.contact);
 
     printf(BLUE "Enter address: " RESET);
     getchar();
@@ -782,17 +781,37 @@ void scheduleAppointment() {
     printf(BLUE "\nEnter patient ID: " RESET);
     scanf("%d", &a.patient_id);
 
+    // Validate patient ID
+    int pid_found = 0;
+    for (int i = 0; i < patient_count; i++) {
+        if (patients[i].id == a.patient_id) { pid_found = 1; break; }
+    }
+    if (!pid_found) {
+        printf(RED "\nInvalid patient ID!\n" RESET);
+        return;
+    }
+
     printf(YELLOW "\nAvailable Doctors:\n");
     printf("--------------------------------------------------------------------------------\n" RESET);
     viewDoctors();
     printf(BLUE "\nEnter doctor ID: " RESET);
     scanf("%d", &a.doctor_id);
 
+    // Validate doctor ID
+    int did_found = 0;
+    for (int i = 0; i < doctor_count; i++) {
+        if (doctors[i].id == a.doctor_id) { did_found = 1; break; }
+    }
+    if (!did_found) {
+        printf(RED "\nInvalid doctor ID!\n" RESET);
+        return;
+    }
+
     printf(BLUE "\nEnter date (DD/MM/YYYY): " RESET);
-    scanf("%s", a.date);
+    scanf("%19s", a.date);
 
     printf(BLUE "Enter time (HH:MM): " RESET);
-    scanf("%s", a.time);
+    scanf("%9s", a.time);
 
     printf(BLUE "Enter purpose: " RESET);
     getchar();
@@ -861,6 +880,16 @@ void generateBill() {
     printf(BLUE "\nEnter patient ID: " RESET);
     scanf("%d", &b.patient_id);
 
+    // Validate patient ID
+    int pid_found = 0;
+    for (int i = 0; i < patient_count; i++) {
+        if (patients[i].id == b.patient_id) { pid_found = 1; break; }
+    }
+    if (!pid_found) {
+        printf(RED "\nInvalid patient ID!\n" RESET);
+        return;
+    }
+
     printf(BLUE "\nEnter consultation fee: " RESET);
     scanf("%f", &b.consultation_fee);
 
@@ -874,7 +903,7 @@ void generateBill() {
     scanf("%f", &b.lab_charges);
 
     printf(BLUE "Enter date (DD/MM/YYYY): " RESET);
-    scanf("%s", b.date);
+    scanf("%19s", b.date);
 
     b.total_amount = b.consultation_fee + b.medicine_charges +
                     b.room_charges + b.lab_charges;
@@ -1048,8 +1077,18 @@ void saveStaffData() {
 void loadStaffData() {
     FILE *fp = fopen("staff.dat", "rb");
     if(fp != NULL) {
-        fread(&staff_count, sizeof(int), 1, fp);
-        fread(staff, sizeof(Staff), staff_count, fp);
+        int cnt = 0;
+        if (fread(&cnt, sizeof(int), 1, fp) == 1) {
+            if (cnt < 0) cnt = 0;
+            if (cnt > 200) cnt = 200; // capacity guard
+            staff_count = cnt;
+            size_t readn = fread(staff, sizeof(Staff), staff_count, fp);
+            if (readn != (size_t)staff_count) {
+                staff_count = (int)readn; // clamp to actually read records
+            }
+        } else {
+            staff_count = 0;
+        }
         fclose(fp);
     }
 }
@@ -1100,36 +1139,76 @@ void loadData() {
     // Load patients
     fp = fopen("patients.dat", "rb");
     if(fp != NULL) {
-        fread(&patient_count, sizeof(int), 1, fp);
-        fread(patients, sizeof(Patient), patient_count, fp);
+        int cnt = 0;
+        if (fread(&cnt, sizeof(int), 1, fp) == 1) {
+            if (cnt < 0) cnt = 0;
+            if (cnt > 1000) cnt = 1000; // capacity guard
+            patient_count = cnt;
+            size_t readn = fread(patients, sizeof(Patient), patient_count, fp);
+            if (readn != (size_t)patient_count) {
+                patient_count = (int)readn;
+            }
+        } else {
+            patient_count = 0;
+        }
         fclose(fp);
     }
 
     // Load doctors
     fp = fopen("doctors.dat", "rb");
     if(fp != NULL) {
-        fread(&doctor_count, sizeof(int), 1, fp);
-        fread(doctors, sizeof(Doctor), doctor_count, fp);
+        int cnt = 0;
+        if (fread(&cnt, sizeof(int), 1, fp) == 1) {
+            if (cnt < 0) cnt = 0;
+            if (cnt > 100) cnt = 100; // capacity guard
+            doctor_count = cnt;
+            size_t readn = fread(doctors, sizeof(Doctor), doctor_count, fp);
+            if (readn != (size_t)doctor_count) {
+                doctor_count = (int)readn;
+            }
+        } else {
+            doctor_count = 0;
+        }
         fclose(fp);
     }
 
     // Load appointments
     fp = fopen("appointments.dat", "rb");
     if(fp != NULL) {
-        fread(&appointment_count, sizeof(int), 1, fp);
-        fread(appointments, sizeof(Appointment), appointment_count, fp);
+        int cnt = 0;
+        if (fread(&cnt, sizeof(int), 1, fp) == 1) {
+            if (cnt < 0) cnt = 0;
+            if (cnt > 500) cnt = 500; // capacity guard
+            appointment_count = cnt;
+            size_t readn = fread(appointments, sizeof(Appointment), appointment_count, fp);
+            if (readn != (size_t)appointment_count) {
+                appointment_count = (int)readn;
+            }
+        } else {
+            appointment_count = 0;
+        }
         fclose(fp);
     }
 
     // Load bills
     fp = fopen("bills.dat", "rb");
     if(fp != NULL) {
-        fread(&bill_count, sizeof(int), 1, fp);
-        fread(bills, sizeof(Bill), bill_count, fp);
+        int cnt = 0;
+        if (fread(&cnt, sizeof(int), 1, fp) == 1) {
+            if (cnt < 0) cnt = 0;
+            if (cnt > 300) cnt = 300; // capacity guard
+            bill_count = cnt;
+            size_t readn = fread(bills, sizeof(Bill), bill_count, fp);
+            if (readn != (size_t)bill_count) {
+                bill_count = (int)readn;
+            }
+        } else {
+            bill_count = 0;
+        }
         fclose(fp);
     }
     // Load staff data
-     loadStaffData();
+    loadStaffData();
 }
 
 //  ADMIN PANEL FUNCTIONS
@@ -1190,7 +1269,7 @@ int adminLogin() {
 
     while(attempts < 3) {
         printf(BLUE "\nUsername: " RESET);
-        scanf("%s", username);
+        scanf("%49s", username);
 
         // Use the password masking function
         getPasswordWithMask(password, 50);
@@ -2073,7 +2152,7 @@ void monthlyRevenueReport() {
 
     float monthly_total = 0;
     int monthly_bills = 0;
-    int days[32] = {0}; // Revenue per day
+    float days[32] = {0}; // Revenue per day
 
     printf(YELLOW "\nMonthly Revenue Report for %d/%d:\n", month, year);
     printf("================================================================================\n" RESET);
